@@ -1,0 +1,21 @@
+IDI_ICON1 ICON DISCARDABLE "@CMAKE_CURRENT_SOURCE_DIR@/assets/game.ico"
+1 VERSIONINFO
+FILEVERSION     @CMAKE_PROJECT_COMMAVERSION@
+PRODUCTVERSION  @CMAKE_PROJECT_COMMAVERSION@
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "FileVersion", "1.0"
+      VALUE "InternalName", "@CMAKE_PROJECT_NAME@"
+      VALUE "OriginalFilename", "@FRONTEND_NAME@.exe"
+      VALUE "ProductName", "@CMAKE_PROJECT_NAME@"
+      VALUE "ProductVersion", "@CMAKE_PROJECT_VERSION@"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1252
+  END
+END

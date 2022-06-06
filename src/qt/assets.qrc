@@ -1,0 +1,15 @@
+<RCC>
+  <qresource prefix="background">
+    <file>assets/background.bmp</file>
+  </qresource>
+  <qresource prefix="icon">
+    <file>assets/globe.png</file>
+    <file>assets/logo.png</file>
+    <file>assets/gear-solid.png</file>
+    <file>assets/discord.png</file>
+    <file>assets/game.ico</file>
+  </qresource>
+  <qresource prefix="font">
+    <file>assets/tf2build.ttf</file>
+  </qresource>
+</RCC>
