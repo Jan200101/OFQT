@@ -9,4 +9,4 @@ SET(CLI_SOURCES
 )
 
 add_executable(${FRONTEND_NAME} ${CLI_SOURCES})
-target_link_libraries(${FRONTEND_NAME} PRIVATE libofqt)
+target_link_libraries(${FRONTEND_NAME} PRIVATE tvn)

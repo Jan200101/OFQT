@@ -29,6 +29,6 @@ if(WIN32)
 endif()
 
 add_executable(${FRONTEND_NAME} WIN32 ${QT_SOURCES})
-target_link_libraries(${FRONTEND_NAME} PRIVATE libofqt)
+target_link_libraries(${FRONTEND_NAME} PRIVATE tvn)
 target_link_libraries(${FRONTEND_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 set_property(TARGET ${FRONTEND_NAME} PROPERTY CXX_STANDARD 11)
