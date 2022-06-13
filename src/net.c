@@ -9,7 +9,8 @@
 #include "net.h"
 #include "fs.h"
 
-#define USER_AGENT NAME "/" VERSION
+// official servers only whitelist some UAs
+#define USER_AGENT "murse/0.1 (" NAME "/" VERSION ")"
 
 void net_init()
 {
