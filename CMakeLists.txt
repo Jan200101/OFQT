@@ -11,8 +11,8 @@ endif()
 
 project(OFQT VERSION 0.1.0 LANGUAGES C)
 
-option(BUILD_CLI "Build the CLI client" ON)
-option(BUILD_QT "Build the Qt GUI client" ON)
+option(BUILD_CLI "Build the CLI client" OFF)
+option(BUILD_QT "Build the Qt GUI client" OFF)
 
 set(TOAST_DEFAULT_REMOTE "http://toast.openfortress.fun/toast" CACHE STRING
     "Default Mirror to get OpenFortress files from")
