@@ -25,7 +25,7 @@ list(APPEND
     ${CMAKE_CURRENT_SOURCE_DIR}/toast.h
 )
 
-add_library(tvn OBJECT ${CORE_SOURCES})
+add_library(tvn STATIC ${CORE_SOURCES})
 target_compile_options(tvn PUBLIC ${CFLAGS})
 
 target_include_directories(tvn PUBLIC ${LIBCURL_INCLUDE_DIRS})

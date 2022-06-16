@@ -589,7 +589,7 @@ static int fileHash(char* path, char* hash)
     fseek(fd, 0L, SEEK_SET);
 
     MD5_CTX context;
-    MD5Init(&context);
+    MD5_Init(&context);
 
     if (fd_size)
     {
@@ -602,13 +602,13 @@ static int fileHash(char* path, char* hash)
 
         fread(buf, sizeof(char), fd_size, fd);
 
-        MD5Update(&context, buf, fd_size);
+        MD5_Update(&context, buf, fd_size);
         free(buf);
     }
     fclose(fd);
 
     unsigned char digest[16];
-    MD5Final(digest, &context);
+    MD5_Final(digest, &context);
 
     char md5string[33];
     for(int i = 0; i < 16; ++i)
