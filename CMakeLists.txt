@@ -9,7 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
-project(OFQT VERSION 0.1.2 LANGUAGES C)
+project(OFQT VERSION 0.1.3 LANGUAGES C)
 
 option(BUILD_CLI "Build the CLI client" OFF)
 option(BUILD_QT "Build the Qt GUI client" OFF)
