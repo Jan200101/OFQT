@@ -97,6 +97,7 @@ void MainWindow::workerResult(const enum Worker::Results_t& result)
         case Worker::RESULT_UPDATE_TEXT:
             ui->progressBar->setValue(worker->progress);
             ui->infoLabel->setText(worker->infoText);
+            worker->infoText.clear();
             break;
 
         case Worker::RESULT_IS_INSTALLED:
@@ -233,7 +234,7 @@ void MainWindow::openWebsite()
 
 void MainWindow::resetProgress()
 {
-    ui->progressBar->setFormat("");
+    ui->progressBar->setFormat("%p%");
     ui->progressBar->setValue(-1);
 }
 

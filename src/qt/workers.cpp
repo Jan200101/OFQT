@@ -14,7 +14,7 @@
 struct thread_object_info {
     int working;
 
-    QString* infoText;
+    QString infoText;
     char* of_dir;
     char* remote;
     struct revision_t* rev;
@@ -26,7 +26,6 @@ static void* thread_download(void* pinfo)
     struct thread_object_info* info = (struct thread_object_info*)pinfo;
     if (info)
     {
-        QString* infoText = info->infoText;
         char* of_dir = info->of_dir;
         char* remote = info->remote;
         struct revision_t* rev = info->rev;
@@ -35,10 +34,10 @@ static void* thread_download(void* pinfo)
         struct file_info* file = &rev->files[i];
         if (file->type == TYPE_WRITE)
         {
-            *info->infoText = QString("Verifying %1").arg(file->object);
+            info->infoText = QString("Verifying %1").arg(file->object);
             if (verifyFileHash(of_dir, file))
             {
-                *infoText = QString("Downloading %1").arg(file->object);
+                info->infoText = QString("Downloading %1").arg(file->object);
                 downloadObject(of_dir, remote, file);
             }
         }
@@ -132,23 +131,24 @@ int Worker::update_setup(int local_rev, int remote_rev)
 
             pthread_t* thread = &download_threads[tindex];
             struct thread_object_info* info = &thread_info[tindex];
-            QString* threadString = &infoStrings[tindex];
 
+            QString* threadString = &info->infoText;
             if (!threadString->isEmpty())
             {
                 infoText = *threadString;
                 emit resultReady(RESULT_UPDATE_TEXT);
+
+                // allow the main thread to clear the string before we continue
+                while (!infoText.isEmpty() && do_work) {};
             }
 
             info->working = 1;
-            info->infoText = threadString;
             info->of_dir = of_dir;
             info->remote = remote;
             info->rev = rev;
             info->index = i;
             progress = (int)(((i * 100) + 1) / rev->file_count);
 
-            emit resultReady(RESULT_UPDATE_TEXT);
             pthread_create(thread, NULL, thread_download, info);
         }
 

@@ -67,4 +67,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Windows Binaries
-        path: ${{runner.workspace}}/build/{OFQT,OFCL}.exe
+        path: |
+          ${{runner.workspace}}/build/*.exe
