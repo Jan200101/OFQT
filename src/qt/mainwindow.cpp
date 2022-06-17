@@ -13,10 +13,6 @@
 #include "./ui_mainwindow.h"
 #include "workers.hpp"
 
-
-
-#define FONT "tf2build"
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -28,9 +24,9 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType<Worker::Tasks_t>("Task_t");
     qRegisterMetaType<Worker::Results_t>("Results_t");
 
-    QFontDatabase::addApplicationFont (":/font/assets/" FONT ".ttf");
-    QFont playFont(FONT, 20, QFont::Bold);
-    QFont progressFont(FONT, 10, QFont::Normal);
+    QFontDatabase::addApplicationFont (":/font/assets/tf2build.ttf");
+    QFont playFont("TF2 Build", 20, QFont::Bold);
+    QFont progressFont("TF2 Build", 10, QFont::Normal);
 
     ui->mainButton->setFont(playFont);
     ui->progressBar->setFont(progressFont);
