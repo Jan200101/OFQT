@@ -68,4 +68,4 @@ jobs:
       with:
         name: Windows Binaries
         path: |
-          ${{runner.workspace}}/build/*.exe
+          build/*.exe
