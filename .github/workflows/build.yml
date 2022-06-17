@@ -1,0 +1,70 @@
+name: CI
+
+env:
+  BUILD_TYPE: Debug
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install qt5-default libcurl4-openssl-dev libjson-c-dev cmake make wget
+
+    - name: Configure CMake
+      run: |
+        cmake $GITHUB_WORKSPACE -B "build" \
+          -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+          -DBUILD_CLI=ON -DBUILD_QT=ON
+
+    - name: Build
+      run: cmake --build build
+
+  build-windows:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-key adv \
+          --keyserver keyserver.ubuntu.com \
+          --recv-keys 86B72ED9 && \
+        sudo add-apt-repository \
+          "deb [arch=amd64] https://pkg.mxe.cc/repos/apt `lsb_release -sc` main" && \
+        sudo apt-get update
+        sudo apt-get -y install mxe-i686-w64-mingw32.static-{cc,cmake,qt5,curl,json-c}
+
+    - name: Configure CMake
+      run: |
+        PATH=/usr/lib/mxe/usr/bin:$PATH \
+        i686-w64-mingw32.static-cmake $GITHUB_WORKSPACE -B "build" \
+          -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+          -DBUILD_CLI=ON -DBUILD_QT=ON
+
+    - name: Build
+      run: |
+        PATH=/usr/lib/mxe/usr/bin:$PATH \
+        i686-w64-mingw32.static-cmake --build build
+
+    - name: Upload Binaries
+      if: ${{ !env.ACT }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: Windows Binaries
+        path: ${{runner.workspace}}/build/{OFQT,OFCL}.exe
