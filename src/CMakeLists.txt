@@ -2,6 +2,7 @@
 find_package(Libcurl REQUIRED)
 find_package(JsonC REQUIRED)
 add_subdirectory(hash)
+add_subdirectory(vdf)
 
 set(CFLAGS
     -Wall -Wextra -pedantic
@@ -34,6 +35,7 @@ target_include_directories(tvn PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(tvn LINK_PUBLIC ${LIBCURL_LIBRARIES})
 target_link_libraries(tvn LINK_PUBLIC ${JSONC_LIBRARIES})
 target_link_libraries(tvn LINK_PUBLIC md5)
+target_link_libraries(tvn LINK_PUBLIC vdf)
 
 if(BUILD_CLI)
     add_subdirectory(cli)
