@@ -37,6 +37,10 @@ target_link_libraries(tvn LINK_PUBLIC ${JSONC_LIBRARIES})
 target_link_libraries(tvn LINK_PUBLIC md5)
 target_link_libraries(tvn LINK_PUBLIC vdf)
 
+# frontends are included last so they will be
+# put in the root of the build directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 if(BUILD_CLI)
     add_subdirectory(cli)
 endif()

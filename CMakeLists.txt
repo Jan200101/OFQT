@@ -13,6 +13,11 @@ project(OFQT VERSION 0.1.3 LANGUAGES C)
 
 option(BUILD_CLI "Build the CLI client" OFF)
 option(BUILD_QT "Build the Qt GUI client" OFF)
+option(ENABLE_TESTS "Enable tests of the various components" OFF)
+
+if (ENABLE_TESTS)
+    enable_testing()
+endif()
 
 set(TOAST_DEFAULT_REMOTE "http://toast.openfortress.fun/toast" CACHE STRING
     "Default Mirror to get OpenFortress files from")
@@ -20,8 +25,6 @@ set(TOAST_DEFAULT_REMOTE "http://toast.openfortress.fun/toast" CACHE STRING
 add_compile_definitions(NAME="${CMAKE_PROJECT_NAME}")
 add_compile_definitions(VERSION="${CMAKE_PROJECT_VERSION}")
 add_compile_definitions(TOAST_DEFAULT_REMOTE="${TOAST_DEFAULT_REMOTE}")
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 

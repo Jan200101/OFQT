@@ -34,11 +34,11 @@ static void* thread_download(void* pinfo)
         struct file_info* file = &rev->files[i];
         if (file->type == TYPE_WRITE)
         {
-            fprintf(stderr, "\rChecking    %lu/%lu (%s)", i+1, rev->file_count, file->object);
+            fprintf(stderr, "\rChecking    %zu/%zu (%s)", i+1, rev->file_count, file->object);
 
             if (verifyFileHash(of_dir, file))
             {
-                fprintf(stderr, "\rDownloading %lu/%lu (%s)", i+1, rev->file_count, file->object);
+                fprintf(stderr, "\rDownloading %zu/%zu (%s)", i+1, rev->file_count, file->object);
                 downloadObject(of_dir, remote, file);
             }
         }

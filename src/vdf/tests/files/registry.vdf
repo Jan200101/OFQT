@@ -1,0 +1,47 @@
+"Registry"
+{
+	"HKCU"
+	{
+		"Software"
+		{
+			"Valve"
+			{
+				"Steam"
+				{
+					"empty"
+					{
+					}
+					"slash-test"
+					{
+						"key\"string"		"value\"string"
+					}
+					"steamglobal"
+					{
+						"language"		"english"
+					}
+					"Apps"
+					{
+						"10090"
+						{
+							"installed"		"1"
+							"Updating"		"0"
+							"Running"		"0"
+						}
+						"1245040"
+						{
+							"installed"		"1"
+							"Updating"		"0"
+							"Running"		"0"
+						}
+						"287700"
+						{
+							"installed"		"1"
+							"Updating"		"0"
+							"Running"		"0"
+						}
+					}
+				}
+			}
+		}
+	}
+}

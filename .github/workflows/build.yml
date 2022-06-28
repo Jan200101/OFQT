@@ -29,10 +29,14 @@ jobs:
       run: |
         cmake $GITHUB_WORKSPACE -B "build" \
           -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-          -DBUILD_CLI=ON -DBUILD_QT=ON
+          -DBUILD_CLI=ON -DBUILD_QT=ON \
+          -DENABLE_TESTS=ON
 
     - name: Build
       run: cmake --build build
+
+    - name: Test
+      run: ctest --test-dir build
 
   build-windows:
     runs-on: ubuntu-latest
@@ -55,12 +59,17 @@ jobs:
         PATH=/usr/lib/mxe/usr/bin:$PATH \
         i686-w64-mingw32.static-cmake $GITHUB_WORKSPACE -B "build" \
           -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-          -DBUILD_CLI=ON -DBUILD_QT=ON
+          -DBUILD_CLI=ON -DBUILD_QT=ON \
+          -DENABLE_TESTS=ON
 
     - name: Build
       run: |
         PATH=/usr/lib/mxe/usr/bin:$PATH \
         i686-w64-mingw32.static-cmake --build build
+
+    - name: Test
+      run: |
+        ctest --test-dir build
 
     - name: Upload Binaries
       if: ${{ !env.ACT }}

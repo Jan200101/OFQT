@@ -43,6 +43,9 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
         switch (*tail)
         {
             case CHAR_DOUBLE_QUOTE:
+                if (tail > buffer && *(tail-1) == CHAR_BACKSLASH)
+                    break;
+
                 if (!buf)
                 {
                     buf = tail+1;
@@ -115,7 +118,9 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                 else
                 {
                     size_t len = tail - buf;
-                    o->key = strndup(buf, len);
+                    o->key = malloc(len+1);
+                    strncpy(o->key, buf, len);
+                    o->key[len] = '\0';
                     buf = NULL;
                 }
                 break;
