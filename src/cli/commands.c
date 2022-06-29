@@ -211,7 +211,7 @@ static int run(int c, char** v)
         goto run_cleanup;
     }
 
-    runOpenFortress();
+    runOpenFortress(v+1, (size_t)(c-1));
 
     run_cleanup:
     free(of_dir);

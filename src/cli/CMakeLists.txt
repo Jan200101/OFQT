@@ -12,6 +12,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_executable(${FRONTEND_NAME} ${CLI_SOURCES})
+target_compile_options(${FRONTEND_NAME} PUBLIC ${CFLAGS})
 target_link_libraries(${FRONTEND_NAME} PRIVATE tvn)
 target_link_libraries(${FRONTEND_NAME} PRIVATE Threads::Threads)
 install(TARGETS ${FRONTEND_NAME})

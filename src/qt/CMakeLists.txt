@@ -32,6 +32,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_executable(${FRONTEND_NAME} WIN32 ${QT_SOURCES})
+target_compile_options(${FRONTEND_NAME} PUBLIC ${CFLAGS})
 target_link_libraries(${FRONTEND_NAME} PRIVATE tvn)
 target_link_libraries(${FRONTEND_NAME} PRIVATE Threads::Threads)
 target_link_libraries(${FRONTEND_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)

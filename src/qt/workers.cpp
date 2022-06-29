@@ -291,7 +291,7 @@ void Worker::doWork(const enum Worker::Tasks_t &parameter) {
 
         case TASK_RUN:
             result = getSteamPID() > -1 ? RESULT_EXIT : RESULT_NO_STEAM;
-            if (result == RESULT_EXIT) runOpenFortress();
+            if (result == RESULT_EXIT) runOpenFortress(NULL, 0);
             break;
     }
 
