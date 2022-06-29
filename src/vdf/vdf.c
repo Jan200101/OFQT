@@ -18,7 +18,6 @@
 
 #define FMT_UNKNOWN_CHAR "Encountered Unknown Character %c (%li)\n"
 
-
 struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
 {
     if (!buffer)
@@ -68,12 +67,6 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                     if (len && digits == len)
                     {
                         o->type = VDF_TYPE_INT;
-                    }
-                    else if (len > 6 && len < 9 && (chars+digits) == len-1 && buf[0] == '#')
-                    {
-                        // TODO
-                        //o->type = VDF_TYPE_COLOR;
-                        o->type = VDF_TYPE_STRING;
                     }
                     else
                     {
@@ -230,9 +223,8 @@ struct vdf_object* vdf_object_index_array(struct vdf_object* o, size_t index)
 
 struct vdf_object* vdf_object_index_array_str(struct vdf_object* o, char* str)
 {
-    assert(o);
-    assert(str);
-    assert(o->type == VDF_TYPE_ARRAY);
+    if (!o || !str || o->type != VDF_TYPE_ARRAY)
+        return NULL;
 
     for (size_t i = 0; i < o->data.data_array.len; ++i)
     {
@@ -283,26 +275,18 @@ static void vdf_print_object_indent(struct vdf_object* o, int l)
             puts("}");
             break;
 
-        default:
-        case VDF_TYPE_NONE:
-        case VDF_TYPE_FLOAT:
-        case VDF_TYPE_PTR: // ?
-        case VDF_TYPE_COLOR:
-            assert(0);
-            break;
-
         case VDF_TYPE_INT:
-            printf("\t\t\"%i\"\n", o->data.data_int);
+            printf("\t\t\"%lli\"\n", o->data.data_int);
             break;
 
         case VDF_TYPE_STRING:
             printf("\t\t\"%s\"\n", o->data.data_string.str);
             break;
 
-        case VDF_TYPE_WSTRING:
+        default:
+        case VDF_TYPE_NONE:
             assert(0);
             break;
-
     }
 }
 
@@ -326,22 +310,14 @@ void vdf_free_object(struct vdf_object* o)
             free(o->data.data_array.data_value);
             break;
 
-        default:
-        case VDF_TYPE_NONE:
-        case VDF_TYPE_INT:
-        case VDF_TYPE_FLOAT:
-        case VDF_TYPE_PTR: // ?
-        case VDF_TYPE_COLOR:
-            break;
 
         case VDF_TYPE_STRING:
             if (o->data.data_string.str)
                 free(o->data.data_string.str);
             break;
 
-        case VDF_TYPE_WSTRING:
-            if (o->data.data_wstring.str)
-                free(o->data.data_wstring.str);
+        default:
+        case VDF_TYPE_NONE:
             break;
 
     }

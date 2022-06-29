@@ -13,11 +13,7 @@ enum vdf_data_type
     VDF_TYPE_NONE,
     VDF_TYPE_ARRAY,
     VDF_TYPE_STRING,
-    VDF_TYPE_INT,
-    VDF_TYPE_FLOAT,
-    VDF_TYPE_PTR,
-    VDF_TYPE_WSTRING,
-    VDF_TYPE_COLOR
+    VDF_TYPE_INT
 };
 
 struct vdf_object;
@@ -33,17 +29,7 @@ union vdf_data {
         size_t len;
     } data_string;
 
-    int data_int;
-    float data_float;
-
-    void* data_ptr; // TYPE?
-
-    struct {
-        wchar_t* str;
-        size_t len;
-    } data_wstring;
-
-    uint32_t color; // RGBA
+    int64_t data_int;
 };
 
 struct vdf_object
@@ -55,18 +41,19 @@ struct vdf_object
     union vdf_data data;
 };
 
-struct vdf_object* vdf_parse_file(const char* path);
+struct vdf_object* vdf_parse_buffer(const char*, size_t);
+struct vdf_object* vdf_parse_file(const char*);
 
-size_t vdf_object_get_array_length(struct vdf_object* o);
-struct vdf_object* vdf_object_index_array(struct vdf_object* o, size_t index);
-struct vdf_object* vdf_object_index_array_str(struct vdf_object* o, char* str);
+size_t vdf_object_get_array_length(struct vdf_object*);
+struct vdf_object* vdf_object_index_array(struct vdf_object*, size_t);
+struct vdf_object* vdf_object_index_array_str(struct vdf_object*, char*);
 
-const char* vdf_object_get_string(struct vdf_object* o);
+const char* vdf_object_get_string(struct vdf_object*);
 
-int vdf_object_get_int(struct vdf_object* o);
+int vdf_object_get_int(struct vdf_object*);
 
-void vdf_print_object(struct vdf_object* o);
-void vdf_free_object(struct vdf_object* o);
+void vdf_print_object(struct vdf_object*);
+void vdf_free_object(struct vdf_object*);
 
 #ifdef __cplusplus
 }
