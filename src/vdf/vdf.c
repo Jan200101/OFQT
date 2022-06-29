@@ -18,6 +18,77 @@
 
 #define FMT_UNKNOWN_CHAR "Encountered Unknown Character %c (%li)\n"
 
+static char* local_strndup_escape(const char* s, size_t n)
+{
+    if (!s)
+       return NULL;
+
+    char* retval = malloc(n + 1);
+    strncpy(retval, s, n);
+    retval[n] = '\0';
+
+    char* head = retval;
+    char* tail = retval + n;
+
+    while (*head)
+    {
+        if (*head == CHAR_BACKSLASH)
+        {
+            switch (head[1])
+            {
+                case 'n':
+                    memmove(head, head+1, (size_t)(tail-head));
+                    *head = CHAR_NEWLINE;
+                    break;
+
+                case 't':
+                    memmove(head, head+1, (size_t)(tail-head));
+                    *head = CHAR_TAB;
+                    break;
+
+                case CHAR_BACKSLASH:
+                case CHAR_DOUBLE_QUOTE:
+                    memmove(head, head+1, (size_t)(tail-head));
+                    break;
+            }
+        }
+        ++head;
+    }
+
+    return retval;
+}
+
+static void puts_escaped(const char* s)
+{
+    while (*s)
+    {
+        switch(*s)
+        {
+            case CHAR_DOUBLE_QUOTE:
+                printf("\\\"");
+                break;
+
+            case CHAR_TAB:
+                printf("\\t");
+                break;
+
+            case CHAR_NEWLINE:
+                printf("\\n");
+                break;
+
+            case CHAR_BACKSLASH:
+                printf("\\\\");
+                break;
+
+            default:
+                printf("%c", *s);
+                break;
+        }
+
+        ++s;
+    }
+}
+
 struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
 {
     if (!buffer)
@@ -80,10 +151,8 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                             break;
 
                         case VDF_TYPE_STRING:
-                            o->data.data_string.str = malloc(len+1);
                             o->data.data_string.len = len;
-                            strncpy(o->data.data_string.str, buf, len);
-                            o->data.data_string.str[len] = '\0';
+                            o->data.data_string.str = local_strndup_escape(buf, len);
                             break;
 
                         default:
@@ -111,9 +180,7 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                 else
                 {
                     size_t len = tail - buf;
-                    o->key = malloc(len+1);
-                    strncpy(o->key, buf, len);
-                    o->key[len] = '\0';
+                    o->key = local_strndup_escape(buf, len);
                     buf = NULL;
                 }
                 break;
@@ -259,7 +326,10 @@ static void vdf_print_object_indent(struct vdf_object* o, int l)
     for (int k = 0; k < l; ++k)
         printf("%s", spacing);
 
-    printf("\"%s\"", o->key);
+    printf("\"");
+    puts_escaped(o->key);
+    printf("\"");
+
     switch (o->type)
     {
         case VDF_TYPE_ARRAY:
@@ -280,7 +350,9 @@ static void vdf_print_object_indent(struct vdf_object* o, int l)
             break;
 
         case VDF_TYPE_STRING:
-            printf("\t\t\"%s\"\n", o->data.data_string.str);
+            printf("\t\t\"");
+            puts_escaped(o->data.data_string.str);
+            printf("\"\n");
             break;
 
         default:

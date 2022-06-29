@@ -11,34 +11,16 @@
 					"empty"
 					{
 					}
-					"slash-test"
-					{
-						"key\"string"		"value\"string"
-					}
 					"steamglobal"
 					{
 						"language"		"english"
 					}
-					"Apps"
+					"escape_test"
 					{
-						"10090"
-						{
-							"installed"		"1"
-							"Updating"		"0"
-							"Running"		"0"
-						}
-						"1245040"
-						{
-							"installed"		"1"
-							"Updating"		"0"
-							"Running"		"0"
-						}
-						"287700"
-						{
-							"installed"		"1"
-							"Updating"		"0"
-							"Running"		"0"
-						}
+						"double\"quote"		"ab\"cd"
+						"tab\tulator"		"ab\tcd"
+						"new\nline"		"ab\ncd"
+						"back\\slash"		"ab\\cd"
 					}
 				}
 			}
