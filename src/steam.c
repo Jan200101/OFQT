@@ -261,11 +261,14 @@ int runOpenFortress(char** args, size_t arg_count)
 
     char** argv = malloc(sizeof(char*) * (arg_count + 6));
 
+#ifdef _WIN32
     size_t of_dir_len = strlen(of_dir); 
     of_dir = realloc(of_dir, of_dir_len + 3);
     memmove(of_dir+1, of_dir, of_dir_len);
     of_dir[0] = '"';
     of_dir[of_dir_len+1] = '"';
+    of_dir[of_dir_len+2] = '\0';
+#endif
 
     argv[0] = game;
     argv[1] = "-game";
@@ -299,6 +302,15 @@ int runOpenFortress(char** args, size_t arg_count)
         strcat(steam, STEAM_BIN);
 
         char** argv = malloc(sizeof(char*) * (arg_count + 8));
+
+#ifdef _WIN32
+    size_t of_dir_len = strlen(of_dir); 
+    of_dir = realloc(of_dir, of_dir_len + 3);
+    memmove(of_dir+1, of_dir, of_dir_len);
+    of_dir[0] = '"';
+    of_dir[of_dir_len+1] = '"';
+    of_dir[of_dir_len+2] = '\0';
+#endif
 
         argv[0] = steam;
         argv[1] = "-applaunch";
