@@ -14,6 +14,11 @@ extern "C" {
 int isFile(const char*);
 int isDir(const char*);
 
+int isRelativePath(const char*);
+int leavesRelativePath(const char*);
+
+char* normalizeUnixPath(char* path);
+
 int makeDir(const char*);
 int removeDir(const char*);
 

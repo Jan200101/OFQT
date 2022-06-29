@@ -36,6 +36,9 @@ target_link_libraries(tvn LINK_PUBLIC ${LIBCURL_LIBRARIES})
 target_link_libraries(tvn LINK_PUBLIC ${JSONC_LIBRARIES})
 target_link_libraries(tvn LINK_PUBLIC md5)
 target_link_libraries(tvn LINK_PUBLIC vdf)
+if (WIN32)
+    target_link_libraries(tvn LINK_PUBLIC shlwapi)
+endif()
 
 # frontends are included last so they will be
 # put in the root of the build directory

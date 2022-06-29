@@ -7,6 +7,11 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <shlwapi.h>
+#endif
+
 #include "fs.h"
 
 #ifdef _WIN32
@@ -57,6 +62,66 @@ int isDir(const char* path)
     return S_ISDIR(sb.st_mode);
 }
 
+int isRelativePath(const char* path)
+{
+    if (!path)
+        return 0;
+    else if (*path == *OS_PATH_SEP)
+        return 0;
+#ifdef _WIN32
+    else if (!PathIsRelativeA(path))
+        return 0;
+#endif
+    return 1;
+}
+
+int leavesRelativePath(const char* path)
+{
+    if (!path || !isRelativePath(path))
+        return 0;
+
+    int depth = 0;
+    const char* head = path;
+    const char* tail = head;
+
+    while (*tail)
+    {
+        ++tail;
+        if (*tail == *OS_PATH_SEP || *tail == '\0')
+        {
+            size_t size = (size_t)(tail-head);
+            if (!size)
+                continue;
+            else if (!strncmp(head, "..", size))
+                depth -= 1;
+            else if (strncmp(head, ".", size))
+                depth += 1;
+
+            if (depth < 0)
+                return 1;
+
+            head = tail + 1;
+        }
+    }
+    return 0;
+}
+
+char* normalizeUnixPath(char* path)
+{
+    char* head = path;
+    if (head)
+    {    
+        while (*head)
+        {
+            if (*head == '/')
+                *head = *OS_PATH_SEP;
+
+            ++head;
+        }
+    }
+
+    return path;
+}
 int makeDir(const char* path)
 {
     char pathcpy[PATH_MAX];

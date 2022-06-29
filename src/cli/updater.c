@@ -10,7 +10,7 @@
 
 #include <assert.h>
 
-#define THREAD_COUNT 8
+#define THREAD_COUNT 4
 
 struct thread_object_info {
     int working;
@@ -57,6 +57,19 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
 
     if (rev)
     {
+        fprintf(stderr, "Validating revisions");
+        for (size_t i = 0; i < rev->file_count; ++i)
+        {
+            struct file_info* file = &rev->files[i];
+
+            if (leavesRelativePath(file->path))
+            {
+                printf("Revision contains invalid path '%s'\n", file->path);
+                freeRevision(rev);
+                return;
+            }
+        }
+
         pthread_t download_threads[THREAD_COUNT] = {0};
         struct thread_object_info thread_info[THREAD_COUNT] = {0};
         size_t tindex = 0;
@@ -100,20 +113,20 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
             free(buf);
         }
 
-        fprintf(stderr, "\rInstalling...");
+        puts("");
         for (size_t i = 0; i < rev->file_count; ++i)
         {
             struct file_info* file = &rev->files[i];
 
+            fprintf(stderr, "\rInstalling  %zu/%zu (%s)", i+1, rev->file_count, file->object);
             switch (file->type)
             {
                 case TYPE_WRITE:
                 case TYPE_MKDIR:
                     {
-                        int k = applyObject(of_dir, file);
-                        if (k)
+                        if (applyObject(of_dir, file))
                         {
-                            printf("Failed to write %s\n", file->path);
+                            printf("\rFailed to write %s\n", file->path);
                         }
                     }
                     break;
@@ -125,7 +138,7 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
                         snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
                         if (isFile(buf) && remove(buf))
                         {
-                            printf("Failed to delete %s\n", file->path);
+                            printf("\rFailed to delete %s\n", file->path);
                         }
                         free(buf);
                     }
@@ -137,7 +150,7 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
         setLocalRemote(of_dir, remote);
         setLocalRevision(of_dir, remote_rev);
 
-        fprintf(stderr, "\rUpdated OpenFortress\n");
+        fprintf(stderr, "\nUpdated OpenFortress\n");
         freeRevision(rev);
     }
 }

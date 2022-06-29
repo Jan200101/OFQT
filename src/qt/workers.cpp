@@ -109,14 +109,30 @@ void Worker::stop_work()
 int Worker::update_setup(int local_rev, int remote_rev)
 {
     if (!of_dir) return 1;
+    else if (update_in_progress) return 0;
+
+    update_in_progress = true;
 
     int retval = 0;
-
-
     struct revision_t* rev = fastFowardRevisions(remote, local_rev, remote_rev);
 
     if (rev)
     {
+        for (size_t i = 0; i < rev->file_count; ++i)
+        {
+            struct file_info* file = &rev->files[i];
+
+            if (leavesRelativePath(file->path))
+            {
+                infoText = QString("Revision contains invalid path '%1'").arg(file->path);
+                emit resultReady(RESULT_UPDATE_TEXT);
+
+                update_in_progress = false;
+                freeRevision(rev);
+                return 1;
+            }
+        }
+
         pthread_t download_threads[THREAD_COUNT] = {0};
         struct thread_object_info thread_info[THREAD_COUNT] = {0, NULL, NULL, NULL, NULL, 0};
         size_t tindex = 0;
@@ -221,6 +237,8 @@ int Worker::update_setup(int local_rev, int remote_rev)
 
         freeRevision(rev);
     }
+
+    update_in_progress = false;
 
     return retval;
 }

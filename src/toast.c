@@ -348,7 +348,7 @@ struct revision_t* getRevisionData(char* url, int rev)
 
         json_object_object_get_ex(file, "path", &temp);
         assert(temp);
-        revision->files[i].path = strdup(json_object_get_string(temp));
+        revision->files[i].path = normalizeUnixPath(strdup(json_object_get_string(temp)));
 
         json_object_object_get_ex(file, "hash", &temp);
         if (temp)
@@ -419,7 +419,7 @@ struct revision_t* fastFowardRevisions(char* url, int from, int to)
             rev->files[rev->file_count].type = cur_rev->files[j].type;
 
             if (cur_rev->files[j].path)
-                rev->files[rev->file_count].path = strdup(cur_rev->files[j].path);
+                rev->files[rev->file_count].path = normalizeUnixPath(strdup(cur_rev->files[j].path));
             else
                 rev->files[rev->file_count].path = NULL;
 
@@ -515,6 +515,7 @@ size_t downloadObject(char* dir, char* url, struct file_info* info)
  *  0 on success
  *  1 on missing object
  *  2 on general failure
+ *  3 on invalid path
  */
 int applyObject(char* path, struct file_info* info)
 {
@@ -526,6 +527,8 @@ int applyObject(char* path, struct file_info* info)
 
     if (!path || !isDir(path))
         return 2;
+    else if (!isRelativePath(file) || leavesRelativePath(file))
+        return 3;
     else if (!object)
         return 0;
 

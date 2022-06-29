@@ -20,6 +20,7 @@ private:
     size_t remote_len;
 
     bool do_work = true;
+    bool update_in_progress = false;
 
 public:
     int progress = -1;
