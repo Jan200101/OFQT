@@ -35,11 +35,6 @@ jobs:
     - name: Build
       run: cmake --build build
 
-    - name: Test
-      run: |
-        cd build
-        ctest .
-
   build-windows:
     runs-on: ubuntu-latest
 
@@ -55,7 +50,7 @@ jobs:
           "deb [arch=amd64] https://pkg.mxe.cc/repos/apt `lsb_release -sc` main" && \
         sudo dpkg --add-architecture i386
         sudo apt-get update
-        sudo apt-get -y install wine wine32 mxe-i686-w64-mingw32.static-{cc,cmake,qt5,curl,json-c}
+        sudo apt-get -y install mxe-i686-w64-mingw32.static-{cc,cmake,qt5,curl,json-c}
 
     - name: Configure CMake
       run: |
@@ -69,11 +64,6 @@ jobs:
       run: |
         PATH=/usr/lib/mxe/usr/bin:$PATH \
         i686-w64-mingw32.static-cmake --build build
-
-    - name: Test
-      run: |
-        cd build
-        ctest
 
     - name: Upload Binaries
       if: ${{ !env.ACT }}
