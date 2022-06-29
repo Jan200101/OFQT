@@ -8,6 +8,7 @@
  * on a known file
  */
 #include <stdio.h>
+#include <assert.h>
 
 #include "vdf.h"
 
@@ -38,12 +39,27 @@ int main(int argc, char** argv)
         }
     }
 
-    int retval = k->type != VDF_TYPE_STRING;
+    int retval = k != NULL && k->type == VDF_TYPE_ARRAY;
 
-    if (retval)
+    if (!k || retval)
         vdf_print_object(k);
     else
-        puts(k->data.data_string.str);
+    {
+        switch(k->type)
+        {
+            case VDF_TYPE_STRING:
+                puts(k->data.data_string.str);
+                break;
+
+            case VDF_TYPE_INT:
+                printf("%lli\n", k->data.data_int);
+                break;
+
+            default:
+                assert(0);
+        }
+
+    }
 
     vdf_free_object(o);
 
