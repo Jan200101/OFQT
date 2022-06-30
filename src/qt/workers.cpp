@@ -321,7 +321,7 @@ void Worker::doWork(const enum Worker::Tasks_t &parameter) {
             result = getSteamPID() > -1 ? RESULT_EXIT : RESULT_NO_STEAM;
             if (result == RESULT_EXIT)
             {
-                auto arg_list = getArguments().split(' ', Qt::SkipEmptyParts);
+                auto arg_list = getArguments().split(' ');
 
                 auto argv = (char**)malloc(sizeof(char*) * arg_list.size());
                 for (int i = 0; i < arg_list.size(); ++i)
