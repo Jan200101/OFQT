@@ -86,6 +86,16 @@ void Worker::setRemote(QString remotestr)
     setLocalRemote(of_dir, remote);
 }
 
+QString Worker::getArguments()
+{
+    return settings.value("launchArguments", QString()).toString();
+}
+
+void Worker::setArguments(QString argumentstr)
+{
+    settings.setValue("launchArguments", argumentstr);
+}
+
 int Worker::getRevision()
 {
     return getLocalRevision(of_dir);
@@ -309,7 +319,20 @@ void Worker::doWork(const enum Worker::Tasks_t &parameter) {
 
         case TASK_RUN:
             result = getSteamPID() > -1 ? RESULT_EXIT : RESULT_NO_STEAM;
-            if (result == RESULT_EXIT) runOpenFortress(NULL, 0);
+            if (result == RESULT_EXIT)
+            {
+                auto arg_list = getArguments().split(' ', Qt::SkipEmptyParts);
+
+                auto argv = (char**)malloc(sizeof(char*) * arg_list.size());
+                for (int i = 0; i < arg_list.size(); ++i)
+                    argv[i] = strdup(arg_list[i].toStdString().c_str());
+
+                runOpenFortress(argv, arg_list.size());
+
+                for (int i = 0; i < arg_list.size(); ++i)
+                    free(argv[i]);
+                free(argv);
+            }
             break;
     }
 

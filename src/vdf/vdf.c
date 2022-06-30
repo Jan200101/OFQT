@@ -195,7 +195,7 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                 o->type = VDF_TYPE_ARRAY;
                 o->data.data_array.len = 0;
                 o->data.data_array.data_value = malloc((sizeof(void*)) * (o->data.data_array.len + 1));
-                o->data.data_array.data_value[o->data.data_array.len] = malloc(sizeof(struct vdf_object)),
+                o->data.data_array.data_value[o->data.data_array.len] = malloc(sizeof(struct vdf_object));
                 o->data.data_array.data_value[o->data.data_array.len]->parent = o;
 
                 o = o->data.data_array.data_value[o->data.data_array.len];

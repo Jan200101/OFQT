@@ -23,11 +23,13 @@ void Settings::refresh()
 
     ui->revisionLabel->setText(QString("%1").arg(this->worker->getRevision()));
     ui->installLabel->setText(this->worker->getOfDir());
+    ui->argumentsEdit->setText(this->worker->getArguments());
 }
 
 void Settings::applySettings()
 {
     worker->setRemote(ui->serverEdit->text());
+    worker->setArguments(ui->argumentsEdit->text());
     this->hide();
 }
 

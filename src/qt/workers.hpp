@@ -2,6 +2,7 @@
 #define WORKERS_HPP
 
 #include <QObject>
+#include <QSettings>
 #include <limits.h>
 
 QT_BEGIN_NAMESPACE
@@ -22,6 +23,8 @@ private:
     bool do_work = true;
     bool update_in_progress = false;
 
+    QSettings settings;
+
 public:
     int progress = -1;
     QString infoText;
@@ -32,6 +35,8 @@ public:
     QString getOfDir();
     QString getRemote();
     void setRemote(QString);
+    QString getArguments();
+    void setArguments(QString);
 
     int getRevision();
     int getRemoteRevision();
