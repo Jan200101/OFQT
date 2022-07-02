@@ -13,6 +13,8 @@
 #define CHAR_DOUBLE_QUOTE '"'
 #define CHAR_OPEN_CURLY_BRACKET '{'
 #define CHAR_CLOSED_CURLY_BRACKET '}'
+#define CHAR_OPEN_ANGLED_BRACKET '['
+#define CHAR_CLOSED_ANGLED_BRACKET ']'
 #define CHAR_FRONTSLASH '/'
 #define CHAR_BACKSLASH '\\'
 
@@ -231,7 +233,23 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
 
                 break;
 
+            case CHAR_OPEN_ANGLED_BRACKET:
+                printf("%i\n", buf);
+                if (!buf)
+                    while (*tail != '\0' && *tail != CHAR_CLOSED_ANGLED_BRACKET)
+                        ++tail;
+                break;
+
             default:
+                if (!buf)
+                {
+                    // we found something we are probably not suppose to
+                    // the easiest way out is to just terminate
+                    vdf_free_object(root_object);
+                    return NULL;
+                }
+                break;
+
             case CHAR_NEWLINE:
             case CHAR_SPACE:
             case CHAR_TAB:
