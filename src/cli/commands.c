@@ -13,12 +13,14 @@
 static int install(int, char**);
 static int update(int, char**);
 static int run(int, char**);
+static int version(int, char**);
 static int info(int, char**);
 
 const struct Command commands[] = {
     { .name = "install",   .func = install, .description = "Install OpenFortress"},
     { .name = "update",    .func = update,  .description = "Update an existing install"},
     { .name = "run",       .func = run,     .description = "Run OpenFortress"},
+    { .name = "version",   .func = version, .description = "Display the OFCL version"},
     { .name = "info",      .func = info,    .description = "Show info about the current setup"},
 };
 const size_t commands_size = ARRAY_LEN(commands);
@@ -216,6 +218,12 @@ static int run(int c, char** v)
     run_cleanup:
     free(of_dir);
     return exit_val;
+}
+
+static int version(int c, char** v)
+{
+    puts(VERSION);
+    return EXIT_SUCCESS;
 }
 
 static int info(int c, char** v)
