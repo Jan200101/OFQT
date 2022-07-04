@@ -39,6 +39,8 @@ struct vdf_object
 
     enum vdf_data_type type;
     union vdf_data data;
+
+    char* conditional;
 };
 
 struct vdf_object* vdf_parse_buffer(const char*, size_t);

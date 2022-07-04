@@ -60,7 +60,7 @@ static char* local_strndup_escape(const char* s, size_t n)
     return retval;
 }
 
-static void puts_escaped(const char* s)
+static void print_escaped(const char* s)
 {
     while (*s)
     {
@@ -100,6 +100,7 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
     root_object->key = NULL;
     root_object->parent = NULL;
     root_object->type = VDF_TYPE_NONE;
+    root_object->conditional = NULL;
 
     struct vdf_object* o = root_object;
 
@@ -177,6 +178,7 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                         o = o->data.data_array.data_value[o->data.data_array.len];
                         o->key = NULL;
                         o->type = VDF_TYPE_NONE;
+                        o->conditional = NULL;
                     }
                 }
                 else
@@ -203,6 +205,7 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                 o = o->data.data_array.data_value[o->data.data_array.len];
                 o->key = NULL;
                 o->type = VDF_TYPE_NONE;
+                o->conditional = NULL;
                 break;
 
             case CHAR_CLOSED_CURLY_BRACKET:
@@ -222,6 +225,7 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                     o = o->data.data_array.data_value[o->data.data_array.len];
                     o->key = NULL;
                     o->type = VDF_TYPE_NONE;
+                    o->conditional = NULL;
                 }
 
                 break;
@@ -234,10 +238,21 @@ struct vdf_object* vdf_parse_buffer(const char* buffer, size_t size)
                 break;
 
             case CHAR_OPEN_ANGLED_BRACKET:
-                printf("%i\n", buf);
                 if (!buf)
+                {
+                    struct vdf_object* prev = o->parent->data.data_array.data_value[o->parent->data.data_array.len-1];
+                    assert(!prev->conditional);
+
+                    buf = tail+1;
+
                     while (*tail != '\0' && *tail != CHAR_CLOSED_ANGLED_BRACKET)
                         ++tail;
+
+                    prev->conditional = local_strndup_escape(buf, tail-buf);
+
+                    buf = NULL;
+                }
+
                 break;
 
             default:
@@ -345,22 +360,22 @@ static void vdf_print_object_indent(struct vdf_object* o, int l)
         printf("%s", spacing);
 
     printf("\"");
-    puts_escaped(o->key);
+    print_escaped(o->key);
     printf("\"");
 
     switch (o->type)
     {
         case VDF_TYPE_ARRAY:
-            puts("");
+            printf("\n");
             for (int k = 0; k < l; ++k)
                 printf("%s", spacing);
-            puts("{");
+            printf("{\n");
             for (size_t i = 0; i < o->data.data_array.len; ++i)
                 vdf_print_object_indent(o->data.data_array.data_value[i], l+1);
 
             for (int k = 0; k < l; ++k)
                 printf("%s", spacing);
-            puts("}");
+            printf("}");
             break;
 
         case VDF_TYPE_INT:
@@ -369,8 +384,8 @@ static void vdf_print_object_indent(struct vdf_object* o, int l)
 
         case VDF_TYPE_STRING:
             printf("\t\t\"");
-            puts_escaped(o->data.data_string.str);
-            printf("\"\n");
+            print_escaped(o->data.data_string.str);
+            printf("\"");
             break;
 
         default:
@@ -378,6 +393,11 @@ static void vdf_print_object_indent(struct vdf_object* o, int l)
             assert(0);
             break;
     }
+
+    if (o->conditional)
+        printf("\t\t[%s]", o->conditional);
+
+    printf("\n");
 }
 
 void vdf_print_object(struct vdf_object* o)
@@ -414,5 +434,8 @@ void vdf_free_object(struct vdf_object* o)
 
     if (o->key)
         free(o->key);
+
+    if (o->conditional)
+        free(o->conditional);
     free(o);
 }

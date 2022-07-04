@@ -22,6 +22,11 @@
 						"new\nline"		"ab\ncd"
 						"back\\slash"		"ab\\cd"
 					}
+					"conditionals"
+					{
+						"win32"		"value"		[$WIN32]
+						"x360"		"value"		[$X360]
+					}
 				}
 			}
 		}
