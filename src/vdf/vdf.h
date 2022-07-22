@@ -46,13 +46,12 @@ struct vdf_object
 struct vdf_object* vdf_parse_buffer(const char*, size_t);
 struct vdf_object* vdf_parse_file(const char*);
 
-size_t vdf_object_get_array_length(struct vdf_object*);
-struct vdf_object* vdf_object_index_array(struct vdf_object*, size_t);
-struct vdf_object* vdf_object_index_array_str(struct vdf_object*, char*);
+size_t vdf_object_get_array_length(const struct vdf_object*);
+struct vdf_object* vdf_object_index_array(const struct vdf_object*, const size_t);
+struct vdf_object* vdf_object_index_array_str(const struct vdf_object*, const char*);
 
-const char* vdf_object_get_string(struct vdf_object*);
-
-int vdf_object_get_int(struct vdf_object*);
+const char* vdf_object_get_string(const struct vdf_object*);
+int vdf_object_get_int(const struct vdf_object*);
 
 void vdf_print_object(struct vdf_object*);
 void vdf_free_object(struct vdf_object*);

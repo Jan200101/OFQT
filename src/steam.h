@@ -21,7 +21,7 @@ extern "C" {
 
 #define LIBARYFOLDERS_VDF "libraryfolders.vdf"
 #define SOURCESDK_APPID "243750"
-#define SOURCESDK_MANIFEST "appmanifest_" SOURCESDK_APPID ".acf"
+#define STEAM_MANIFEST "appmanifest_%s.acf"
 
 #if defined(_WIN32)
 #define HL2_EXE "hl2.exe"
@@ -53,6 +53,7 @@ extern "C" {
 char* getSteamDir(void);
 char* getSourcemodDir(void);
 char* getOpenFortressDir(void);
+char* getAppInstallDir(const char* appid);
 char* getSourceSDK2013MpDir(void);
 long getSteamPID(void);
 int runOpenFortress(char**, size_t);

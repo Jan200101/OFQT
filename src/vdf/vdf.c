@@ -304,7 +304,7 @@ struct vdf_object* vdf_parse_file(const char* path)
 }
 
 
-size_t vdf_object_get_array_length(struct vdf_object* o)
+size_t vdf_object_get_array_length(const struct vdf_object* o)
 {
     assert(o);
     assert(o->type == VDF_TYPE_ARRAY);
@@ -312,7 +312,7 @@ size_t vdf_object_get_array_length(struct vdf_object* o)
     return o->data.data_array.len;
 }
 
-struct vdf_object* vdf_object_index_array(struct vdf_object* o, size_t index)
+struct vdf_object* vdf_object_index_array(const struct vdf_object* o, const size_t index)
 {
     assert(o);
     assert(o->type == VDF_TYPE_ARRAY);
@@ -321,7 +321,7 @@ struct vdf_object* vdf_object_index_array(struct vdf_object* o, size_t index)
     return o->data.data_array.data_value[index];
 }
 
-struct vdf_object* vdf_object_index_array_str(struct vdf_object* o, char* str)
+struct vdf_object* vdf_object_index_array_str(const struct vdf_object* o, const char* str)
 {
     if (!o || !str || o->type != VDF_TYPE_ARRAY)
         return NULL;
@@ -335,21 +335,21 @@ struct vdf_object* vdf_object_index_array_str(struct vdf_object* o, char* str)
     return NULL;
 }
 
-const char* vdf_object_get_string(struct vdf_object* o)
+const char* vdf_object_get_string(const struct vdf_object* o)
 {
     assert(o->type == VDF_TYPE_STRING);
 
     return o->data.data_string.str;
 }
 
-int vdf_object_get_int(struct vdf_object* o)
+int vdf_object_get_int(const struct vdf_object* o)
 {
     assert(o->type == VDF_TYPE_INT);
 
     return o->data.data_int;
 }
 
-static void vdf_print_object_indent(struct vdf_object* o, int l)
+static void vdf_print_object_indent(const struct vdf_object* o, const int l)
 {
     if (!o)
         return;

@@ -109,13 +109,13 @@ char* getOpenFortressDir(void)
     return sm_dir;
 }
 
-char* getSourceSDK2013MpDir(void)
+char* getAppInstallDir(const char* appid)
 {
     char* librayfolders = getSteamDir();
     if (!librayfolders)
         return NULL;
 
-    librayfolders = realloc(librayfolders, strlen(librayfolders) + strlen(OS_PATH_SEP) + strlen(STEAMAPPS) + strlen(OS_PATH_SEP) + strlen(SOURCESDK_MANIFEST) + 1);
+    librayfolders = realloc(librayfolders, strlen(librayfolders) + strlen(OS_PATH_SEP) + strlen(STEAMAPPS) + strlen(OS_PATH_SEP) + strlen(LIBARYFOLDERS_VDF) + 1);
 
     strcat(librayfolders, OS_PATH_SEP);
     strcat(librayfolders, STEAMAPPS);
@@ -134,14 +134,17 @@ char* getSourceSDK2013MpDir(void)
             struct vdf_object* library = vdf_object_index_array(o, i);
             struct vdf_object* apps = vdf_object_index_array_str(library, "apps");
 
-            if (vdf_object_index_array_str(apps, SOURCESDK_APPID))
+            if (vdf_object_index_array_str(apps, appid))
             {
+                char* manifest = malloc(strlen(appid) + strlen(STEAM_MANIFEST) + 1);
+                sprintf(manifest, STEAM_MANIFEST, appid);
+
                 struct vdf_object* path = vdf_object_index_array_str(library, "path");
 
-                size_t path_len = path->data.data_string.len + strlen(OS_PATH_SEP) + strlen(STEAMAPPS) + strlen(OS_PATH_SEP) + strlen(SOURCESDK_MANIFEST) + 1;
+                size_t path_len = path->data.data_string.len + strlen(OS_PATH_SEP) + strlen(STEAMAPPS) + strlen(OS_PATH_SEP) + strlen(manifest) + 1;
                 char* path_str = malloc(path_len);
 
-                snprintf(path_str, path_len, "%s%s%s%s%s", vdf_object_get_string(path), OS_PATH_SEP, STEAMAPPS, OS_PATH_SEP, SOURCESDK_MANIFEST);
+                snprintf(path_str, path_len, "%s%s%s%s%s", vdf_object_get_string(path), OS_PATH_SEP, STEAMAPPS, OS_PATH_SEP, manifest);
 
                 struct vdf_object* k = vdf_parse_file(path_str);
                 free(path_str);
@@ -158,6 +161,8 @@ char* getSourceSDK2013MpDir(void)
 
                     vdf_free_object(k);
                 }
+
+                free(manifest);
             }
         }
 
@@ -165,6 +170,11 @@ char* getSourceSDK2013MpDir(void)
     }
 
     return sdkdir;
+}
+
+char* getSourceSDK2013MpDir(void)
+{
+    return getAppInstallDir(SOURCESDK_APPID);
 }
 
 /**
