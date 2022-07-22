@@ -159,6 +159,9 @@ void MainWindow::workerResult(const enum Worker::Results_t& result)
             QMessageBox::information(this, windowTitle(), "Steam is not running" );
             break;
 
+        default:
+            assert(0);
+            break;
     }
 
     in_progress = false;

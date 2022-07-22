@@ -122,6 +122,7 @@ char* normalizeUnixPath(char* path)
 
     return path;
 }
+
 int makeDir(const char* path)
 {
     char pathcpy[PATH_MAX];

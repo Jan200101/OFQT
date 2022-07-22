@@ -5,7 +5,7 @@
 #include "net.h"
 #include "commands.h"
 
-static void help()
+static void help(void)
 {
     fprintf(stderr, "OFCL <command>\n"); \
 

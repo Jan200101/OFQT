@@ -231,6 +231,10 @@ int Worker::update_setup(int local_rev, int remote_rev)
                         free(buf);
                     }
                     break;
+
+                default:
+                    assert(0);
+                    break;
             }
         }
 
@@ -333,6 +337,10 @@ void Worker::doWork(const enum Worker::Tasks_t &parameter) {
                     free(argv[i]);
                 free(argv);
             }
+            break;
+
+        default:
+            assert(0);
             break;
     }
 

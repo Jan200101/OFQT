@@ -13,8 +13,8 @@ struct MemoryStruct {
     size_t size;
 };
 
-void net_init();
-void net_deinit();
+void net_init(void);
+void net_deinit(void);
 
 struct MemoryStruct* downloadToRam(const char* URL);
 size_t downloadToFile(const char*, const char*);

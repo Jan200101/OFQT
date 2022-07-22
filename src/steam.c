@@ -17,7 +17,7 @@
  * Returns a heap allocated path to the main steam directory
  * If a problem occurs returns NULL
  */
-char* getSteamDir()
+char* getSteamDir(void)
 {
 #if defined(__linux__) || defined(__FreeBSD__)
     char* home = getenv("HOME");
@@ -83,7 +83,7 @@ char* getSteamDir()
  * Returns a heap allocated path to the sourcemod dirctory
  * If a problem occurs returns NULL
  */
-char* getSourcemodDir()
+char* getSourcemodDir(void)
 {
     char* steam = getSteamDir();
     if (!steam)
@@ -96,7 +96,7 @@ char* getSourcemodDir()
     return steam;
 }
 
-char* getOpenFortressDir()
+char* getOpenFortressDir(void)
 {
     char* sm_dir = getSourcemodDir();
     if (!sm_dir)
@@ -109,7 +109,7 @@ char* getOpenFortressDir()
     return sm_dir;
 }
 
-char* getSourceSDK2013MpDir()
+char* getSourceSDK2013MpDir(void)
 {
     char* librayfolders = getSteamDir();
     if (!librayfolders)
@@ -171,7 +171,7 @@ char* getSourceSDK2013MpDir()
  * function to fetch the PID of a running Steam process.
  * If none were found returns -1
  */
-long getSteamPID()
+long getSteamPID(void)
 {
 #if defined(__linux__) || defined(__FreeBSD__)
 

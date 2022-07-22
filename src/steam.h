@@ -50,11 +50,11 @@ extern "C" {
 #else
 #endif
 
-char* getSteamDir();
-char* getSourcemodDir();
-char* getOpenFortressDir();
-char* getSourceSDK2013MpDir();
-long getSteamPID();
+char* getSteamDir(void);
+char* getSourcemodDir(void);
+char* getOpenFortressDir(void);
+char* getSourceSDK2013MpDir(void);
+long getSteamPID(void);
 int runOpenFortress(char**, size_t);
 
 #ifdef __cplusplus

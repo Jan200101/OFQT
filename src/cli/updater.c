@@ -143,6 +143,10 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
                         free(buf);
                     }
                     break;
+
+                default:
+                    assert(0);
+                    break;
             }
         }
 
