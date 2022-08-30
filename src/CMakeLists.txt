@@ -3,6 +3,7 @@ find_package(Libcurl REQUIRED)
 find_package(JsonC REQUIRED)
 add_subdirectory(hash)
 add_subdirectory(vdf)
+add_subdirectory(threading)
 
 set(CFLAGS
     -Wall -Wextra -pedantic

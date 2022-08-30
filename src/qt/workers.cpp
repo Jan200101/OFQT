@@ -5,20 +5,19 @@
 #include "net.h"
 #include "steam.h"
 #include "toast.h"
+#include "pool.h"
 
 #include "./ui_mainwindow.h"
 #include "workers.hpp"
 
-#define THREAD_COUNT 4
-
 struct thread_object_info {
-    int working;
-
     QString infoText;
     char* of_dir;
     char* remote;
     struct revision_t* rev;
     size_t index;
+
+    Worker* worker;
 };
 
 static void* thread_download(void* pinfo)
@@ -41,11 +40,21 @@ static void* thread_download(void* pinfo)
                 downloadObject(of_dir, remote, file);
             }
         }
+
+        QString* threadString = &info->infoText;
+        if (!threadString->isEmpty())
+        {
+            pthread_mutex_lock(&info->worker->textMutex);
+            // allow the main thread to clear the string before we continue
+            while (!info->worker->infoText.isEmpty()) {};
+
+            info->worker->progress = (int)(((info->index * 100) + 1) / rev->file_count);
+
+            info->worker->infoText = *threadString;
+            emit info->worker->resultReady(Worker::RESULT_UPDATE_TEXT);
+            pthread_mutex_unlock(&info->worker->textMutex);
+        }
     }
-
-    info->working = 0;
-    pthread_exit(0);
-
     return NULL;
 }
 
@@ -54,6 +63,7 @@ Worker::Worker()
     net_init();
     of_dir = NULL;
     remote = NULL;
+    textMutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
 Worker::~Worker()
@@ -143,47 +153,26 @@ int Worker::update_setup(int local_rev, int remote_rev)
             }
         }
 
-        pthread_t download_threads[THREAD_COUNT] = {0};
-        struct thread_object_info thread_info[THREAD_COUNT] = {0, NULL, NULL, NULL, NULL, 0};
-        size_t tindex = 0;
-        QString infoStrings[THREAD_COUNT];
+        struct thread_object_info* thread_info = new struct thread_object_info[rev->file_count];
+        struct pool_t* pool = pool_init();
+        pool->condition = &do_work;
 
-        for (size_t i = 0; i < rev->file_count && do_work; ++i)
+        for (size_t i = 0; i < rev->file_count; ++i)
         {
-            while (thread_info[tindex].working)
-            {
-                tindex = (tindex+1) % THREAD_COUNT;
-            }
+            struct thread_object_info* info = &thread_info[i];
 
-            pthread_t* thread = &download_threads[tindex];
-            struct thread_object_info* info = &thread_info[tindex];
-
-            QString* threadString = &info->infoText;
-            if (!threadString->isEmpty())
-            {
-                infoText = *threadString;
-                emit resultReady(RESULT_UPDATE_TEXT);
-
-                // allow the main thread to clear the string before we continue
-                while (!infoText.isEmpty() && do_work) {};
-            }
-
-            info->working = 1;
             info->of_dir = of_dir;
             info->remote = remote;
             info->rev = rev;
             info->index = i;
-            progress = (int)(((i * 100) + 1) / rev->file_count);
+            info->worker = this;
 
-            pthread_create(thread, NULL, thread_download, info);
+            pool_submit(pool, thread_download, info);
         }
 
-        for (size_t i = 0; i < THREAD_COUNT; ++i)
-        {
-            pthread_t* thread = &download_threads[i];
-            if (*thread)
-                pthread_join(*thread, NULL);
-        }
+        pool_complete(pool);
+        pool_free(pool);
+        delete[] thread_info;
 
         progress = 0;
         infoText = QString("Processing");

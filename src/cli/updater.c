@@ -1,20 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <pthread.h>
 
 #include "fs.h"
 #include "toast.h"
+#include "pool.h"
 
 #include "updater.h"
 
 #include <assert.h>
 
-#define THREAD_COUNT 4
-
 struct thread_object_info {
-    int working;
-
     char* of_dir;
     char* remote;
     struct revision_t* rev;
@@ -43,10 +39,6 @@ static void* thread_download(void* pinfo)
             }
         }
     }
-
-    info->working = 0;
-    pthread_exit(0);
-
     return NULL;
 }
 
@@ -70,35 +62,24 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
             }
         }
 
-        pthread_t download_threads[THREAD_COUNT] = {0};
-        struct thread_object_info thread_info[THREAD_COUNT] = {0};
-        size_t tindex = 0;
+        struct thread_object_info* thread_info = malloc(sizeof(struct thread_object_info) * rev->file_count);
+        struct pool_t* pool = pool_init();
 
         for (size_t i = 0; i < rev->file_count; ++i)
         {
-            while (thread_info[tindex].working)
-            {
-                tindex = (tindex+1) % THREAD_COUNT;
-            }
+            struct thread_object_info* info = &thread_info[i];
 
-            pthread_t* thread = &download_threads[tindex];
-            struct thread_object_info* info = &thread_info[tindex];
-
-            info->working = 1;
             info->of_dir = of_dir;
             info->remote = remote;
             info->rev = rev;
             info->index = i;
 
-            pthread_create(thread, NULL, thread_download, info);
+            pool_submit(pool, thread_download, info);
         }
 
-        for (size_t i = 0; i < THREAD_COUNT; ++i)
-        {
-            pthread_t* thread = &download_threads[i];
-            if (*thread)
-                pthread_join(*thread, NULL);
-        }
+        pool_complete(pool);
+        pool_free(pool);
+        free(thread_info);
 
         for (size_t i = 0; i < rev->file_count; ++i)
         {

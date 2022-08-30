@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSettings>
 #include <limits.h>
+#include <pthread.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,7 +21,7 @@ private:
     char* remote;
     size_t remote_len;
 
-    bool do_work = true;
+    int do_work = 1;
     bool update_in_progress = false;
 
     QSettings settings;
@@ -28,6 +29,7 @@ private:
 public:
     int progress = -1;
     QString infoText;
+    pthread_mutex_t textMutex;
 
     Worker();
     ~Worker();

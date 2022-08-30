@@ -16,6 +16,8 @@ static int run(int, char**);
 static int version(int, char**);
 static int info(int, char**);
 
+#include "pool.h"
+
 const struct Command commands[] = {
     { .name = "install",   .func = install, .description = "Install OpenFortress"},
     { .name = "update",    .func = update,  .description = "Update an existing install"},
