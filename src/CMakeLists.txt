@@ -6,8 +6,7 @@ add_subdirectory(vdf)
 add_subdirectory(threading)
 
 set(CFLAGS
-    -Wall -Wextra -pedantic
-    -Wfloat-equal -Wundef
+    -Wall -Wextra -pedantic -Wfloat-equal
     -Wstrict-overflow=5 -Wunreachable-code
     -Wcast-qual -Wswitch-default
     -Wconversion -Wshadow -Wstrict-aliasing
