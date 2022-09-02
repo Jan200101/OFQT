@@ -142,6 +142,7 @@ void MainWindow::workerResult(const enum Worker::Results_t& result)
 
         case Worker::RESULT_UPDATE_COMPLETE:
             resetProgress();
+            ui->mainButton->setText("Play");
             ui->statusLabel->setText("Updated");
             workerOperate(Worker::TASK_IS_UPTODATE);
             break;

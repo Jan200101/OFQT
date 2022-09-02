@@ -244,20 +244,23 @@ long getSteamPID(void)
 int runOpenFortress(char** args, size_t arg_count)
 {
 #ifdef STEAM_DIRECT_LAUNCH
+    int in_fork = 0;
 #if defined(__linux__) || defined(__FreeBSD__)
     // fork so we don't have to stay alive for the game
-    if (fork()) return 0;
 #endif
-
     char* game = getSourceSDK2013MpDir();
     if (!game)
-        exit(0);
+    {
+        if (in_fork) exit(0);
+        else return 0;
+    }
 
     char* of_dir = getOpenFortressDir();
     if (!of_dir)
     {
         free(game);
-        exit(0);
+        if (in_fork) exit(0);
+        else return 0;
     }
 
     game = realloc(game, strlen(game) + strlen(OS_PATH_SEP) + strlen(HL2_EXE) + 1);
