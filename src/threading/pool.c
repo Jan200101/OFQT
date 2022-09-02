@@ -9,6 +9,7 @@
 struct worker_t {
     struct pool_t* pool;
     int id;
+    int done;
 };
 
 struct pool_t* pool_init()
@@ -51,19 +52,17 @@ static void* task_executor(void* pinfo)
     {
         struct pool_task_t* pool_end = pool->tasks + pool->pool_size;
         struct pool_task_t* task = pool->task_next++;
-        while (pool_end > task)
+        while (pool_end > task && (pool->condition == NULL || *pool->condition))
         {
             if (!task->done)
             {
                 task->func(task->arg);
                 task->done = 1;
             }
-
             task = pool->task_next++;
         }
     }
-
-    return NULL;
+    worker->done = 1;
 }
 
 void pool_complete(struct pool_t* pool)
@@ -81,13 +80,15 @@ void pool_complete(struct pool_t* pool)
 
         worker->pool = pool;
         worker->id = i;
+        worker->done = 0;
 
         pthread_create(thread, NULL, task_executor, worker);
     }
 
     for (int i = 0; i < pool->workers; ++i)
     {
-        pthread_join(threads[i], NULL);
+        if (!workers[i].done)
+            pthread_join(threads[i], NULL);
     }
 
     free(threads);

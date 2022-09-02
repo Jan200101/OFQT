@@ -23,7 +23,10 @@ struct thread_object_info {
 static void* thread_download(void* pinfo)
 {
     struct thread_object_info* info = (struct thread_object_info*)pinfo;
-    if (info)
+    Worker* worker = info->worker;
+    int* do_work = &worker->do_work;
+
+    if (info && *do_work)
     {
         char* of_dir = info->of_dir;
         char* remote = info->remote;
@@ -31,10 +34,10 @@ static void* thread_download(void* pinfo)
         size_t i = info->index;
 
         struct file_info* file = &rev->files[i];
-        if (file->type == TYPE_WRITE)
+        if (file->type == TYPE_WRITE && *do_work)
         {
             info->infoText = QString("Verifying %1").arg(file->object);
-            if (verifyFileHash(of_dir, file))
+            if (verifyFileHash(of_dir, file) && *do_work)
             {
                 info->infoText = QString("Downloading %1").arg(file->object);
                 downloadObject(of_dir, remote, file);
@@ -42,17 +45,17 @@ static void* thread_download(void* pinfo)
         }
 
         QString* threadString = &info->infoText;
-        if (!threadString->isEmpty())
+        if (!threadString->isEmpty() && *do_work)
         {
-            pthread_mutex_lock(&info->worker->textMutex);
+            pthread_mutex_lock(&worker->textMutex);
             // allow the main thread to clear the string before we continue
-            while (!info->worker->infoText.isEmpty()) {};
+            while (!worker->infoText.isEmpty() && *do_work) {};
 
-            info->worker->progress = (int)(((info->index * 100) + 1) / rev->file_count);
+            worker->progress = (int)(((info->index * 100) + 1) / rev->file_count);
 
-            info->worker->infoText = *threadString;
-            emit info->worker->resultReady(Worker::RESULT_UPDATE_TEXT);
-            pthread_mutex_unlock(&info->worker->textMutex);
+            worker->infoText = *threadString;
+            emit worker->resultReady(Worker::RESULT_UPDATE_TEXT);
+            pthread_mutex_unlock(&worker->textMutex);
         }
     }
     return NULL;
@@ -123,7 +126,7 @@ bool Worker::isOutdated()
 
 void Worker::stop_work()
 {
-    do_work = false;
+    do_work = 0;
 }
 
 int Worker::update_setup(int local_rev, int remote_rev)

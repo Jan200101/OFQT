@@ -21,12 +21,12 @@ private:
     char* remote;
     size_t remote_len;
 
-    int do_work = 1;
     bool update_in_progress = false;
 
     QSettings settings;
 
 public:
+    int do_work = 1;
     int progress = -1;
     QString infoText;
     pthread_mutex_t textMutex;

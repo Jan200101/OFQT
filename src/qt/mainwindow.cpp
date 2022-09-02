@@ -98,6 +98,8 @@ void MainWindow::workerResult(const enum Worker::Results_t& result)
 
         case Worker::RESULT_IS_INSTALLED:
             installed = true;
+            ui->mainButton->setText("Play");
+            ui->statusLabel->setText("Checking for updates...");
             workerOperate(Worker::TASK_IS_UPTODATE);
             break;
 
@@ -108,7 +110,6 @@ void MainWindow::workerResult(const enum Worker::Results_t& result)
 
         case Worker::RESULT_IS_UPTODATE:
             uptodate = true;
-            ui->mainButton->setText("Play");
             ui->statusLabel->setText("Up to Date");
             break;
 
