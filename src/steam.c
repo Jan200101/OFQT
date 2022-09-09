@@ -239,14 +239,13 @@ long getSteamPID(void)
     return -1;
 }
 
-#define STEAM_LAUNCH
-
 int runOpenFortress(char** args, size_t arg_count)
 {
 #ifdef STEAM_DIRECT_LAUNCH
     int in_fork = 0;
 #if defined(__linux__) || defined(__FreeBSD__)
     // fork so we don't have to stay alive for the game
+    if (fork()) return 0;
 #endif
     char* game = getSourceSDK2013MpDir();
     if (!game)

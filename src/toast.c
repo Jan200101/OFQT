@@ -310,7 +310,7 @@ struct revision_t* getRevisionData(char* url, int rev)
     {
 
         int rev_copy = rev;
-        while (rev_copy > 10)
+        while (rev_copy >= 10)
         {
             rev_copy /= 10;
             rev_len++;
