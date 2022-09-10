@@ -54,3 +54,7 @@ endif()
 if(BUILD_QT)
     add_subdirectory(qt)
 endif()
+
+if (BUILD_MIRROR)
+    add_subdirectory(mirror)
+endif()

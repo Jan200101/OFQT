@@ -13,6 +13,7 @@ project(OFQT VERSION 0.1.4 LANGUAGES C)
 
 option(BUILD_CLI "Build the CLI client" OFF)
 option(BUILD_QT "Build the Qt GUI client" OFF)
+option(BUILD_MIRROR "Build the Mirror client" OFF)
 option(ENABLE_TESTS "Enable tests of the various components" OFF)
 option(DIRECT_LAUNCH "Launch OpenFortress directly instead of via Steam" ON)
 option(NAIVE_LAUNCH "Launch through the Steam Browser Protocol [Does not support Launch Options]" OFF)
