@@ -78,6 +78,7 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
         }
 
         pool_complete(pool);
+        fprintf(stderr, "\rChecking    %zu/%zu", rev->file_count, rev->file_count);
         pool_free(pool);
         free(thread_info);
 
