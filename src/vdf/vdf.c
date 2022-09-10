@@ -326,7 +326,7 @@ struct vdf_object* vdf_object_index_array_str(const struct vdf_object* o, const 
     if (!o || !str || o->type != VDF_TYPE_ARRAY)
         return NULL;
 
-    for (size_t i = o->data.data_array.len-1; i >= 0; --i)
+    for (size_t i = 0; i < o->data.data_array.len; ++i)
     {
         struct vdf_object* k = o->data.data_array.data_value[i];
         if (!strcmp(k->key, str))
