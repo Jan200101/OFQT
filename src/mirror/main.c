@@ -6,6 +6,7 @@
 #include "toast.h"
 #include "fs.h"
 #include "pool.h"
+#include "net.h"
 
 struct thread_object_info {
     int i;
@@ -155,7 +156,8 @@ int main(int argc, char** argv)
     sprintf(buf, "%i", latest_rev);
     sprintf(revisions_dir_end, "%slatest", OS_PATH_SEP);
 
-    symlink(buf, revisions_dir);
+    setLocalRevision(output_dir, latest_rev);
+    symlink(".." OS_PATH_SEP TOAST_LOCAL_REVISION_PATH, revisions_dir);
 
     free(buf);
     free(revisions_dir);
