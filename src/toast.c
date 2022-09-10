@@ -21,19 +21,6 @@
 #define TOAST_DEFAULT_REMOTE "http://toast.openfortress.fun/toast"
 #endif
 
-#define TVN_DIR ".tvn"
-#define LOCAL_REMOTE "remote"
-#define LOCAL_REVISION "revision"
-#define LOCAL_OBJECTS "objects"
-#define LOCAL_REMOTE_PATH TVN_DIR OS_PATH_SEP LOCAL_REMOTE
-#define LOCAL_REVISION_PATH TVN_DIR OS_PATH_SEP LOCAL_REVISION
-#define LOCAL_OBJECTS_PATH TVN_DIR OS_PATH_SEP LOCAL_OBJECTS
-#define OLD_LOCAL_REVISION_PATH ".revision"
-
-#define OBJECTS_ENDPOINT "objects"
-#define REVISIONS_ENDPOINT "revisions"
-#define LATEST_ENDPOINT REVISIONS_ENDPOINT "/latest"
-
 const char* TYPE_STRINGS[] = {
     "Add/Modify",
     "Create Directory",
@@ -47,13 +34,13 @@ char* getToastDir(char* dir)
     if (!dir)
         return NULL;
 
-    size_t len = strlen(dir) + strlen(OS_PATH_SEP) + strlen(TVN_DIR) + 1;
+    size_t len = strlen(dir) + strlen(OS_PATH_SEP) + strlen(TOAST_TVN_DIR) + 1;
     char* tvn_dir = malloc(len + 1);
     if (!tvn_dir)
         return NULL;
 
     tvn_dir[0] = '\0';
-    snprintf(tvn_dir, len, "%s%s%s", dir, OS_PATH_SEP, TVN_DIR);
+    snprintf(tvn_dir, len, "%s%s%s", dir, OS_PATH_SEP, TOAST_TVN_DIR);
 
     if (!isDir(tvn_dir))
     {
@@ -75,13 +62,13 @@ int getLatestRemoteRevision(char* url)
 {
     assert(url);
     int revision = -1;
-    size_t len = strlen(url) + 1 + strlen(LATEST_ENDPOINT)+1;
+    size_t len = strlen(url) + 1 + strlen(TOAST_LATEST_ENDPOINT)+1;
 
     char* latest_url = malloc(len);
     if (!latest_url)
         return revision;
 
-    snprintf(latest_url, len, "%s/%s", url, LATEST_ENDPOINT);
+    snprintf(latest_url, len, "%s/%s", url, TOAST_LATEST_ENDPOINT);
 
     struct MemoryStruct* latest_data = downloadToRam(latest_url);
     free(latest_url);
@@ -109,7 +96,7 @@ int getLocalRevision(char* dir)
     if (!dir || !isDir(dir))
         return revision;
 
-    size_t len = strlen(dir) + strlen(OS_PATH_SEP) + strlen(LOCAL_REVISION_PATH);
+    size_t len = strlen(dir) + strlen(OS_PATH_SEP) + strlen(TOAST_LOCAL_REVISION_PATH);
     char* revision_path = malloc(len + 1);
     if (!revision_path)
         return revision;
@@ -117,12 +104,12 @@ int getLocalRevision(char* dir)
     // LEGACY BEHAVIOR
     strncpy(revision_path, dir, len);
     strncat(revision_path, OS_PATH_SEP, len - strlen(revision_path));
-    strncat(revision_path, OLD_LOCAL_REVISION_PATH, len - strlen(revision_path));
+    strncat(revision_path, OLD_TOAST_LOCAL_REVISION_PATH, len - strlen(revision_path));
 
     if (!isFile(revision_path))
     {
-        revision_path[len-strlen(LOCAL_REVISION_PATH)] = '\0';
-        strncat(revision_path, LOCAL_REVISION_PATH, len - strlen(revision_path));
+        revision_path[len-strlen(TOAST_LOCAL_REVISION_PATH)] = '\0';
+        strncat(revision_path, TOAST_LOCAL_REVISION_PATH, len - strlen(revision_path));
         if (!isFile(revision_path))
         {
             free(revision_path);
@@ -163,14 +150,14 @@ void setLocalRevision(char* dir, int rev)
 
     // cleanup legacy behavior
     {    
-        char* old_revision_path = malloc(strlen(revision_path) + strlen(OLD_LOCAL_REVISION_PATH));
+        char* old_revision_path = malloc(strlen(revision_path) + strlen(OLD_TOAST_LOCAL_REVISION_PATH));
         strcpy(old_revision_path, revision_path);
 
         char* op = old_revision_path + strlen(old_revision_path);
         while (*op != *OS_PATH_SEP) --op;
         *++op = '\0';
 
-        strcat(old_revision_path, OLD_LOCAL_REVISION_PATH);
+        strcat(old_revision_path, OLD_TOAST_LOCAL_REVISION_PATH);
 
         if (isFile(old_revision_path))
             remove(old_revision_path);
@@ -178,14 +165,14 @@ void setLocalRevision(char* dir, int rev)
         free(old_revision_path);
     }
 
-    size_t len = strlen(revision_path) + strlen(OS_PATH_SEP) + strlen(LOCAL_REVISION) + 1;
+    size_t len = strlen(revision_path) + strlen(OS_PATH_SEP) + strlen(TOAST_LOCAL_REVISION) + 1;
     revision_path = realloc(revision_path, len);
 
     if (!isDir(revision_path))
         makeDir(revision_path);
 
     strncat(revision_path, OS_PATH_SEP, len - strlen(revision_path));
-    strncat(revision_path, LOCAL_REVISION, len - strlen(revision_path));
+    strncat(revision_path, TOAST_LOCAL_REVISION, len - strlen(revision_path));
 
     size_t rev_len = 1 + 1;
     {
@@ -225,14 +212,14 @@ char* getLocalRemote(char* dir)
     if (!dir || !isDir(dir))
         return strdup(TOAST_DEFAULT_REMOTE);
 
-    size_t len = strlen(dir) + strlen(OS_PATH_SEP) +  strlen(LOCAL_REMOTE_PATH);
+    size_t len = strlen(dir) + strlen(OS_PATH_SEP) +  strlen(TOAST_LOCAL_REMOTE_PATH);
     char* remote_path = malloc(len + 1);
     if (!remote_path)
         return strdup(TOAST_DEFAULT_REMOTE);
 
     strncpy(remote_path, dir, len);
     strncat(remote_path, OS_PATH_SEP, len - strlen(remote_path));
-    strncat(remote_path, LOCAL_REMOTE_PATH, len - strlen(remote_path));
+    strncat(remote_path, TOAST_LOCAL_REMOTE_PATH, len - strlen(remote_path));
 
     if (!isFile(remote_path))
     {
@@ -278,14 +265,14 @@ void setLocalRemote(char* dir, char* remote)
     if (!remote_path)
         return;
 
-    size_t len = strlen(remote_path) + strlen(OS_PATH_SEP) + strlen(LOCAL_REMOTE) + 1;
+    size_t len = strlen(remote_path) + strlen(OS_PATH_SEP) + strlen(TOAST_LOCAL_REMOTE) + 1;
     remote_path = realloc(remote_path, len);
 
     if (!isDir(remote_path))
         makeDir(remote_path);
 
     strncat(remote_path, OS_PATH_SEP, len - strlen(remote_path));
-    strncat(remote_path, LOCAL_REMOTE, len - strlen(remote_path));
+    strncat(remote_path, TOAST_LOCAL_REMOTE, len - strlen(remote_path));
 
     FILE* fd = fopen(remote_path, "w");
     free(remote_path);
@@ -317,9 +304,9 @@ struct revision_t* getRevisionData(char* url, int rev)
         }
     }
 
-    size_t len = strlen(url) + 1 + strlen(REVISIONS_ENDPOINT) + 1 + rev_len + 1;
+    size_t len = strlen(url) + 1 + strlen(TOAST_REVISIONS_ENDPOINT) + 1 + rev_len + 1;
     char* buf = malloc(len);
-    snprintf(buf, len, "%s/%s/%i", url, REVISIONS_ENDPOINT, rev);
+    snprintf(buf, len, "%s/%s/%i", url, TOAST_REVISIONS_ENDPOINT, rev);
 
     struct json_object* revision_list = fetchJSON(buf);
     free(buf);
@@ -472,16 +459,18 @@ size_t downloadObject(char* dir, char* url, struct file_info* info)
         return retval;
 
     char* object = info->object;
+    if (!object)
+        return retval;
 
     char* buf_path = getToastDir(dir);
     if (!buf_path)
         return retval;
 
-    size_t len = strlen(buf_path) + strlen(OS_PATH_SEP) + strlen(LOCAL_OBJECTS) + strlen(OS_PATH_SEP) + strlen(object) + 1;
+    size_t len = strlen(buf_path) + strlen(OS_PATH_SEP) + strlen(TOAST_LOCAL_OBJECTS) + strlen(OS_PATH_SEP) + strlen(object) + 1;
     buf_path = realloc(buf_path, len);
 
     strncat(buf_path, OS_PATH_SEP, len - strlen(buf_path));
-    strncat(buf_path, LOCAL_OBJECTS, len - strlen(buf_path));
+    strncat(buf_path, TOAST_LOCAL_OBJECTS, len - strlen(buf_path));
     strncat(buf_path, OS_PATH_SEP, len - strlen(buf_path));
 
     if (!isDir(buf_path))
@@ -496,9 +485,9 @@ size_t downloadObject(char* dir, char* url, struct file_info* info)
         return 0;
     }
 
-    len = strlen(url) + 1 + strlen(OBJECTS_ENDPOINT) + 1 + strlen(object) + 1;
+    len = strlen(url) + 1 + strlen(TOAST_OBJECTS_ENDPOINT) + 1 + strlen(object) + 1;
     char* buf_url = malloc(len);
-    snprintf(buf_url, len, "%s/%s/%s", url, OBJECTS_ENDPOINT, object);
+    snprintf(buf_url, len, "%s/%s/%s", url, TOAST_OBJECTS_ENDPOINT, object);
 
     retval = downloadToFile(buf_url, buf_path);
 
@@ -532,9 +521,9 @@ int applyObject(char* path, struct file_info* info)
     else if (!object)
         return 0;
 
-    size_t len = strlen(path) + strlen(OS_PATH_SEP) + strlen(LOCAL_OBJECTS_PATH) + strlen(OS_PATH_SEP) + strlen(object) + 1;
+    size_t len = strlen(path) + strlen(OS_PATH_SEP) + strlen(TOAST_LOCAL_OBJECTS_PATH) + strlen(OS_PATH_SEP) + strlen(object) + 1;
     char* buf_obj = malloc(len);
-    snprintf(buf_obj, len, "%s%s%s%s%s", path, OS_PATH_SEP, LOCAL_OBJECTS_PATH, OS_PATH_SEP, object);
+    snprintf(buf_obj, len, "%s%s%s%s%s", path, OS_PATH_SEP, TOAST_LOCAL_OBJECTS_PATH, OS_PATH_SEP, object);
 
     if (!isFile(buf_obj))
     {
@@ -569,9 +558,9 @@ void removeObjects(char* path)
     if (!path || !isDir(path))
         return;
 
-    size_t len = strlen(path) + strlen(OS_PATH_SEP) + strlen(LOCAL_OBJECTS_PATH) + strlen(OS_PATH_SEP) + 1;
+    size_t len = strlen(path) + strlen(OS_PATH_SEP) + strlen(TOAST_LOCAL_OBJECTS_PATH) + strlen(OS_PATH_SEP) + 1;
     char* buf = malloc(len);
-    snprintf(buf, len, "%s%s%s%s", path, OS_PATH_SEP, LOCAL_OBJECTS_PATH, OS_PATH_SEP);
+    snprintf(buf, len, "%s%s%s%s", path, OS_PATH_SEP, TOAST_LOCAL_OBJECTS_PATH, OS_PATH_SEP);
 
     removeDir(buf);
 
