@@ -39,6 +39,7 @@ public:
     void setRemote(QString);
     QString getArguments();
     void setArguments(QString);
+    void setInfoText(QString);
 
     int getRevision();
     int getRemoteRevision();

@@ -1,6 +1,6 @@
 
+find_package(json-c REQUIRED)
 find_package(Libcurl REQUIRED)
-find_package(JsonC REQUIRED)
 add_subdirectory(hash)
 add_subdirectory(vdf)
 add_subdirectory(threading)
@@ -14,7 +14,6 @@ set(CFLAGS
     -Wmissing-declarations -Wmissing-include-dirs
     -Wno-unused-parameter -Wuninitialized
     ${LIBCURL_CFLAGS}
-    ${JSONC_CFLAGS}
 )
 
 list(APPEND
@@ -33,12 +32,12 @@ add_library(tvn STATIC ${CORE_SOURCES})
 target_compile_options(tvn PUBLIC ${CFLAGS})
 
 target_include_directories(tvn PUBLIC ${LIBCURL_INCLUDE_DIRS})
-target_include_directories(tvn PUBLIC ${JSONC_INCLUDE_DIRS})
 target_include_directories(tvn PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(tvn LINK_PUBLIC ${LIBCURL_LIBRARIES})
-target_link_libraries(tvn LINK_PUBLIC ${JSONC_LIBRARIES})
+target_link_libraries(tvn LINK_PUBLIC json-c::json-c)
 target_link_libraries(tvn LINK_PUBLIC md5)
 target_link_libraries(tvn LINK_PUBLIC vdf)
+
 if (WIN32)
     target_link_libraries(tvn LINK_PUBLIC shlwapi)
 endif()

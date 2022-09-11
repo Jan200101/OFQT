@@ -152,14 +152,9 @@ int main(int argc, char** argv)
         free(thread_info);
     }
 
-    char* buf = malloc(rev_len+1);
-    sprintf(buf, "%i", latest_rev);
     sprintf(revisions_dir_end, "%slatest", OS_PATH_SEP);
-
     setLocalRevision(output_dir, latest_rev);
     symlink(".." OS_PATH_SEP TOAST_LOCAL_REVISION_PATH, revisions_dir);
-
-    free(buf);
     free(revisions_dir);
 
     cleanup:

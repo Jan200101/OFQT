@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #include <curl/curl.h>
-#include <json.h>
+#include <json-c/json.h>
 
 struct MemoryStruct {
     uint8_t* memory;

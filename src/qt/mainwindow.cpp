@@ -91,9 +91,11 @@ void MainWindow::workerResult(const enum Worker::Results_t& result)
             break;
 
         case Worker::RESULT_UPDATE_TEXT:
+            pthread_mutex_lock(&worker->textMutex);
             ui->progressBar->setValue(worker->progress);
             ui->infoLabel->setText(worker->infoText);
             worker->infoText.clear();
+            pthread_mutex_unlock(&worker->textMutex);
             break;
 
         case Worker::RESULT_IS_INSTALLED:

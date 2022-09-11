@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include <json.h>
+#include <json-c/json.h>
 #include <md5.h>
 
 #if defined(_WIN32)
@@ -17,8 +17,8 @@
 #include "net.h"
 #include "toast.h"
 
-#ifdef TOAST_DEFAULT_REMOTE
-#define TOAST_DEFAULT_REMOTE "http://toast.openfortress.fun/toast"
+#ifndef TOAST_DEFAULT_REMOTE
+#define TOAST_DEFAULT_REMOTE "https://toast.openfortress.fun/toast"
 #endif
 
 const char* TYPE_STRINGS[] = {

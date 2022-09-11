@@ -47,15 +47,11 @@ static void* thread_download(void* pinfo)
         QString* threadString = &info->infoText;
         if (!threadString->isEmpty() && *do_work)
         {
-            pthread_mutex_lock(&worker->textMutex);
-            // allow the main thread to clear the string before we continue
-            while (!worker->infoText.isEmpty() && *do_work) {};
+            int progress = (int)(((info->index * 100) + 1) / rev->file_count);
+            if (progress > worker->progress)
+                worker->progress = progress;
 
-            worker->progress = (int)(((info->index * 100) + 1) / rev->file_count);
-
-            worker->infoText = *threadString;
-            emit worker->resultReady(Worker::RESULT_UPDATE_TEXT);
-            pthread_mutex_unlock(&worker->textMutex);
+            worker->setInfoText(*threadString);
         }
     }
     return NULL;
@@ -104,6 +100,14 @@ QString Worker::getArguments()
     return settings.value("launchArguments", QString()).toString();
 }
 
+void Worker::setInfoText(QString infoTextArg)
+{
+    pthread_mutex_lock(&this->textMutex);
+    this->infoText = infoTextArg;
+    emit this->resultReady(Worker::RESULT_UPDATE_TEXT);
+    pthread_mutex_unlock(&this->textMutex);
+}
+
 void Worker::setArguments(QString argumentstr)
 {
     settings.setValue("launchArguments", argumentstr);
@@ -141,7 +145,7 @@ int Worker::update_setup(int local_rev, int remote_rev)
 
     if (rev)
     {
-        for (size_t i = 0; i < rev->file_count; ++i)
+        for (size_t i = 0; i < rev->file_count && do_work; ++i)
         {
             struct file_info* file = &rev->files[i];
 
@@ -160,7 +164,7 @@ int Worker::update_setup(int local_rev, int remote_rev)
         struct pool_t* pool = pool_init();
         pool->condition = &do_work;
 
-        for (size_t i = 0; i < rev->file_count; ++i)
+        for (size_t i = 0; i < rev->file_count && do_work; ++i)
         {
             struct thread_object_info* info = &thread_info[i];
 
@@ -178,24 +182,7 @@ int Worker::update_setup(int local_rev, int remote_rev)
         delete[] thread_info;
 
         progress = 0;
-        infoText = QString("Processing");
-        emit resultReady(RESULT_UPDATE_TEXT);
-
-        for (size_t i = 0; i < rev->file_count && do_work; ++i)
-        {
-            struct file_info* file = &rev->files[i];
-            if (file->type != TYPE_MKDIR)
-                continue;
-
-            progress = (int)(((i * 100) + 1) / rev->file_count);
-            emit resultReady(RESULT_UPDATE_TEXT);
-
-            size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
-            char* buf = (char*)malloc(len);
-            snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
-            makeDir(buf);
-            free(buf);
-        }
+        this->setInfoText("Processing");
 
         for (size_t i = 0; i < rev->file_count && do_work; ++i)
         {
@@ -203,13 +190,14 @@ int Worker::update_setup(int local_rev, int remote_rev)
 
             if (file->type != TYPE_DELETE) continue;
             size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
-            char* buf = (char*)malloc(len);
+            char* buf = new char[len];
             snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
-            if (isFile(buf) && remove(buf))
+            if (isFile(buf))
             {
-                printf("\nFailed to delete %s\n", file->path);
+                remove(buf);
             }
-            free(buf);
+            delete[] buf;
+
         }
 
         for (size_t i = 0; i < rev->file_count && do_work; ++i)
@@ -218,24 +206,18 @@ int Worker::update_setup(int local_rev, int remote_rev)
 
             if (file->type != TYPE_MKDIR) continue;
             size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
-            char* buf = (char*)malloc(len);
-            if (!isDir(buf) && makeDir(buf))
-            {
-                printf("\nFailed to create %s\n", file->path);
-            }
-            free(buf);
+            char* buf = new char[len];
+            snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
+            makeDir(buf);
+            delete[] buf;
         }
 
-        for (size_t i = 0; i < rev->file_count; ++i)
+        for (size_t i = 0; i < rev->file_count && do_work; ++i)
         {
             struct file_info* file = &rev->files[i];
 
             if (file->type != TYPE_WRITE) continue;
-            fprintf(stderr, "\rInstalling  %zu/%zu (%s)", i+1, rev->file_count, file->object);
-            if (applyObject(of_dir, file))
-            {
-                printf("\nFailed to write %s\n", file->path);
-            }
+            applyObject(of_dir, file);
         }
 
         if (do_work)
@@ -245,13 +227,10 @@ int Worker::update_setup(int local_rev, int remote_rev)
             setLocalRevision(of_dir, remote_rev);
         }
 
-        progress = 0;
-        infoText = QString("");
-        emit resultReady(RESULT_UPDATE_TEXT);
-
         freeRevision(rev);
     }
 
+    this->setInfoText("");
     update_in_progress = false;
 
     return retval;
