@@ -201,32 +201,40 @@ int Worker::update_setup(int local_rev, int remote_rev)
         {
             struct file_info* file = &rev->files[i];
 
-            progress = (int)(((i * 100) + 1) / rev->file_count);
-            emit resultReady(RESULT_UPDATE_TEXT);
-
-            switch (file->type)
+            if (file->type != TYPE_DELETE) continue;
+            size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
+            char* buf = (char*)malloc(len);
+            snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
+            if (isFile(buf) && remove(buf))
             {
-                case TYPE_WRITE:
-                case TYPE_MKDIR:
-                    {
-                        retval += applyObject(of_dir, file);
-                    }
-                    break;
+                printf("\nFailed to delete %s\n", file->path);
+            }
+            free(buf);
+        }
 
-                case TYPE_DELETE:
-                    {
-                        size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
-                        char* buf = (char*)malloc(len);
-                        snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
-                        if (isFile(buf))
-                            retval += remove(buf);
-                        free(buf);
-                    }
-                    break;
+        for (size_t i = 0; i < rev->file_count && do_work; ++i)
+        {
+            struct file_info* file = &rev->files[i];
 
-                default:
-                    assert(0);
-                    break;
+            if (file->type != TYPE_MKDIR) continue;
+            size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
+            char* buf = (char*)malloc(len);
+            if (!isDir(buf) && makeDir(buf))
+            {
+                printf("\nFailed to create %s\n", file->path);
+            }
+            free(buf);
+        }
+
+        for (size_t i = 0; i < rev->file_count; ++i)
+        {
+            struct file_info* file = &rev->files[i];
+
+            if (file->type != TYPE_WRITE) continue;
+            fprintf(stderr, "\rInstalling  %zu/%zu (%s)", i+1, rev->file_count, file->object);
+            if (applyObject(of_dir, file))
+            {
+                printf("\nFailed to write %s\n", file->path);
             }
         }
 

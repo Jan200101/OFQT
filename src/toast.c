@@ -149,7 +149,7 @@ void setLocalRevision(char* dir, int rev)
         return;
 
     // cleanup legacy behavior
-    {    
+    {
         char* old_revision_path = malloc(strlen(revision_path) + strlen(OLD_TOAST_LOCAL_REVISION_PATH));
         strcpy(old_revision_path, revision_path);
 
@@ -542,12 +542,12 @@ int applyObject(char* path, struct file_info* info)
     char* buf_file = malloc(len);
     snprintf(buf_file, len, "%s%s%s", path, OS_PATH_SEP, file);
 
-    rename(buf_obj, buf_file);
+    int retval = rename(buf_obj, buf_file);
 
     free(buf_obj);
     free(buf_file);
 
-    return 0;
+    return retval;
 }
 
 /**

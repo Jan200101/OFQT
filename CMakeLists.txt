@@ -23,7 +23,7 @@ if (ENABLE_TESTS)
 endif()
 
 
-set(TOAST_DEFAULT_REMOTE "http://toast.openfortress.fun/toast" CACHE STRING
+set(TOAST_DEFAULT_REMOTE "https://toast.openfortress.fun/toast" CACHE STRING
     "Default Mirror to get OpenFortress files from")
 
 add_compile_definitions(NAME="${CMAKE_PROJECT_NAME}")

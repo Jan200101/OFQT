@@ -104,13 +104,13 @@ static int install(int c, char** v)
 static int update(int c, char** v)
 {
     int exit_val = EXIT_SUCCESS;
-    int force = 0;
+    int verify = 0;
     char* of_dir = NULL;
     char* remote = NULL;
     for (int i = 1; i < c; ++i)
     {
-        if (!strcmp(v[i], "--force"))
-            force = 1;
+        if (!strcmp(v[i], "--verify"))
+            verify = 1;
         else if (!strcmp(v[i], "--dir"))
         {
             if (!v[++i])
@@ -138,7 +138,7 @@ static int update(int c, char** v)
 
             puts(
                 "OFCL update\n"
-                "\t--force\t\tforce update\n"
+                "\t--verify\t\tverify game files\n"
                 "\t--dir\t\tspecify where to download OpenFortress to\n"
                 "\t--remote\tspecify the server to use\n"
                 "\t--help\t\tshows this text"
@@ -151,7 +151,7 @@ static int update(int c, char** v)
         of_dir = getOpenFortressDir();
 
     int local_rev = getLocalRevision(of_dir);
-    if (force)
+    if (verify)
     {
         local_rev = 0;
     }

@@ -56,7 +56,7 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
 
             if (leavesRelativePath(file->path))
             {
-                printf("Revision contains invalid path '%s'\n", file->path);
+                fprintf(stderr, "Revision contains invalid path '%s'\n", file->path);
                 freeRevision(rev);
                 return;
             }
@@ -82,53 +82,48 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
         pool_free(pool);
         free(thread_info);
 
-        for (size_t i = 0; i < rev->file_count; ++i)
-        {
-            struct file_info* file = &rev->files[i];
-            if (file->type != TYPE_MKDIR)
-                continue;
-
-            size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
-            char* buf = malloc(len);
-            snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
-            makeDir(buf);
-            free(buf);
-        }
-
         puts("");
         for (size_t i = 0; i < rev->file_count; ++i)
         {
             struct file_info* file = &rev->files[i];
 
-            fprintf(stderr, "\rInstalling  %zu/%zu (%s)", i+1, rev->file_count, file->object);
-            switch (file->type)
+            if (file->type != TYPE_DELETE) continue;
+            fprintf(stderr, "\rDeleting  %zu/%zu", i+1, rev->file_count);
+            size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
+            char* buf = malloc(len);
+            snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
+            if (isFile(buf) && remove(buf))
             {
-                case TYPE_WRITE:
-                case TYPE_MKDIR:
-                    {
-                        if (applyObject(of_dir, file))
-                        {
-                            printf("\rFailed to write %s\n", file->path);
-                        }
-                    }
-                    break;
+                fprintf(stderr, "\rFailed to delete %s\n", file->path);
+            }
+            free(buf);
+        }
 
-                case TYPE_DELETE:
-                    {
-                        size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
-                        char* buf = malloc(len);
-                        snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
-                        if (isFile(buf) && remove(buf))
-                        {
-                            printf("\rFailed to delete %s\n", file->path);
-                        }
-                        free(buf);
-                    }
-                    break;
+        for (size_t i = 0; i < rev->file_count; ++i)
+        {
+            struct file_info* file = &rev->files[i];
 
-                default:
-                    assert(0);
-                    break;
+            if (file->type != TYPE_MKDIR) continue;
+            size_t len = strlen(of_dir) + strlen(OS_PATH_SEP) + strlen(file->path) + 1;
+            char* buf = malloc(len);
+            fprintf(stderr, "\rCreating %zu/%zu", i+1, rev->file_count);
+            snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
+            if (!isDir(buf) && !makeDir(buf))
+            {
+                fprintf(stderr, "\nFailed to create %s\n", file->path);
+            }
+            free(buf);
+        }
+
+        for (size_t i = 0; i < rev->file_count; ++i)
+        {
+            struct file_info* file = &rev->files[i];
+
+            if (file->type != TYPE_WRITE) continue;
+            fprintf(stderr, "\rInstalling  %zu/%zu (%s)", i+1, rev->file_count, file->object);
+            if (applyObject(of_dir, file))
+            {
+                fprintf(stderr, "\nFailed to write %s\n", file->path);
             }
         }
 
