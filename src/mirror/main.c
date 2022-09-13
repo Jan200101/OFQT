@@ -24,7 +24,7 @@ static void* thread_download(void* pinfo)
     if (info)
     {
         struct file_info* file = info->file;
-        fprintf(stderr, "\r [%i][%li/%li] Processing %s", info->i, info->j+1, info->rev->file_count, file->object);
+        printf("\r [%i][%li/%li] Processing %s", info->i, info->j+1, info->rev->file_count, file->object);
 
         // downloadObject checks if an object with the current hash is already present
         downloadObject(info->output_dir, info->remote, info->file);
@@ -98,6 +98,9 @@ int main(int argc, char** argv)
         makeDir(revisions_dir);
     }
 
+    // disable stdout buffering to allow progress output
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     // download objects
     printf("Downloading objects\n");
     int latest_rev = getLatestRemoteRevision(remote);
@@ -114,7 +117,7 @@ int main(int argc, char** argv)
 
     for (int i = 0; i <= latest_rev; ++i)
     {
-        fprintf(stderr, "\r [%i] Downloading", i);
+        printf("\r [%i] Downloading", i);
         sprintf(revisions_dir_end, "%s%i", OS_PATH_SEP, i);
 
         len = strlen(remote) + 1 + strlen(TOAST_REVISIONS_ENDPOINT) + 1 + rev_len + 1;
@@ -127,7 +130,7 @@ int main(int argc, char** argv)
         struct thread_object_info* thread_info = malloc(sizeof(struct thread_object_info) * rev->file_count);
         struct pool_t* pool = pool_init();
 
-        fprintf(stderr, "\r [%i] Preparing  ", i);
+        printf("\r [%i] Preparing  ", i);
         for (size_t j = 0; j < rev->file_count; ++j)
         {
             struct file_info* file = &rev->files[j];
