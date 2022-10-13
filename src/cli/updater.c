@@ -78,7 +78,6 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
         }
 
         pool_complete(pool);
-        fprintf(stderr, "\rChecking    %zu/%zu", rev->file_count, rev->file_count);
         pool_free(pool);
         free(thread_info);
 
@@ -108,7 +107,7 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
             char* buf = malloc(len);
             fprintf(stderr, "\rCreating %zu/%zu", i+1, rev->file_count);
             snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
-            if (!isDir(buf) && !makeDir(buf))
+            if (!isDir(buf) && makeDir(buf))
             {
                 fprintf(stderr, "\nFailed to create %s\n", file->path);
             }
