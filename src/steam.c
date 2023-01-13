@@ -239,13 +239,13 @@ long getSteamPID(void)
     return -1;
 }
 
-int runOpenFortress(char** args, size_t arg_count)
+int runOpenFortressDirect(char** args, size_t arg_count)
 {
-#ifdef STEAM_DIRECT_LAUNCH
     int in_fork = 0;
 #if defined(__linux__) || defined(__FreeBSD__)
     // fork so we don't have to stay alive for the game
     if (fork()) return 0;
+    in_fork = 1;
 #endif
     char* game = getSourceSDK2013MpDir();
     if (!game)
@@ -297,23 +297,26 @@ int runOpenFortress(char** args, size_t arg_count)
     free(of_dir);
 
     exit(0);
+}
 
-#else
-    #ifdef STEAM_NAIVE_LAUNCH
-        #ifdef _WIN32
-            return system("start steam://rungameid/11677091221058336806");
-        #else
-            return system("xdg-open steam://rungameid/11677091221058336806");
-        #endif
-
+int runOpenFortressNaive(char** args, size_t arg_count)
+{
+    #ifdef _WIN32
+        return system("start steam://rungameid/11677091221058336806");
     #else
-        char* of_dir = getOpenFortressDir();
-        char* steam = getSteamDir();
-        steam = realloc(steam, strlen(steam) + strlen(OS_PATH_SEP) + strlen(STEAM_BIN) + 1);
-        strcat(steam, OS_PATH_SEP);
-        strcat(steam, STEAM_BIN);
+        return system("xdg-open steam://rungameid/11677091221058336806");
+    #endif
+}
 
-        char** argv = malloc(sizeof(char*) * (arg_count + 8));
+int runOpenFortressSteam(char** args, size_t arg_count)
+{
+    char* of_dir = getOpenFortressDir();
+    char* steam = getSteamDir();
+    steam = realloc(steam, strlen(steam) + strlen(OS_PATH_SEP) + strlen(STEAM_BIN) + 1);
+    strcat(steam, OS_PATH_SEP);
+    strcat(steam, STEAM_BIN);
+
+    char** argv = malloc(sizeof(char*) * (arg_count + 8));
 
 #ifdef _WIN32
     size_t of_dir_len = strlen(of_dir); 
@@ -324,18 +327,29 @@ int runOpenFortress(char** args, size_t arg_count)
     of_dir[of_dir_len+2] = '\0';
 #endif
 
-        argv[0] = steam;
-        argv[1] = "-applaunch";
-        argv[2] = "243750";
-        argv[3] = "-game";
-        argv[4] = of_dir;
-        argv[5] = "-secure";
-        argv[6] = "-steam";
-        for (size_t i = 0; i < arg_count; ++i)
-            argv[7+i] = args[i];
-        argv[7+arg_count] = NULL;
+    argv[0] = steam;
+    argv[1] = "-applaunch";
+    argv[2] = "243750";
+    argv[3] = "-game";
+    argv[4] = of_dir;
+    argv[5] = "-secure";
+    argv[6] = "-steam";
+    for (size_t i = 0; i < arg_count; ++i)
+        argv[7+i] = args[i];
+    argv[7+arg_count] = NULL;
 
-        return execv(steam, argv);
+    return execv(steam, argv);
+}
+
+int runOpenFortress(char** args, size_t arg_count)
+{
+#ifdef STEAM_DIRECT_LAUNCH
+    return runOpenFortressDirect(args, arg_count);
+#else
+    #ifdef STEAM_NAIVE_LAUNCH
+        return runOpenFortressNaive(args, arg_count);
+    #else
+        return runOpenFortressSteam(args, arg_count);
     #endif
 #endif
 }

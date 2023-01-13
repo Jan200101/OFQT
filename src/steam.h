@@ -38,6 +38,10 @@ extern "C" {
 #elif defined(__FreeBSD__)
 #define HL2_EXE "hl2.sh"
 #define STEAM_DIR "/.steam/steam"
+// No flatpak :(
+
+#else
+#error Unsupported Operating System
 
 #endif
 
@@ -46,16 +50,16 @@ extern "C" {
 #define SOURCEMOD_DIR STEAMAPPS OS_PATH_SEP "sourcemods"
 #define OPEN_FORTRESS_DIR "open_fortress"
 
-#if defined(_WIN32)
-#else
-#endif
-
 char* getSteamDir(void);
 char* getSourcemodDir(void);
 char* getOpenFortressDir(void);
 char* getAppInstallDir(const char* appid);
 char* getSourceSDK2013MpDir(void);
 long getSteamPID(void);
+
+int runOpenFortressDirect(char**, size_t);
+int runOpenFortressNaive(char**, size_t);
+int runOpenFortressSteam(char**, size_t);
 int runOpenFortress(char**, size_t);
 
 #ifdef __cplusplus

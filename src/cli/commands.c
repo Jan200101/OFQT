@@ -200,6 +200,48 @@ static int run(int c, char** v)
     int exit_val = EXIT_SUCCESS;
     char* of_dir = getOpenFortressDir();
 
+    int (*launch_func)(char**, size_t) = runOpenFortress;
+
+    int arg_index;
+    for (arg_index = 1; arg_index < c; ++arg_index)
+    {
+        if (v[arg_index][0] != '-' && v[arg_index][1] != '-')
+            break;
+
+        if (!strcmp(v[arg_index]+2, "direct"))
+        {
+            
+            launch_func = runOpenFortressDirect;
+        }
+        else if (!strcmp(v[arg_index]+2, "naive"))
+        {
+            
+            launch_func = runOpenFortressNaive;
+        }
+        else if (!strcmp(v[arg_index]+2, "steam"))
+        {
+            
+            launch_func = runOpenFortressSteam;
+        }
+        else
+        {
+            fprintf(stderr,
+                "OFCL run [flags] [options]\n"
+                "\n"
+                " flags:\n"
+                "    --direct    launch OpenFortress directly\n"
+                "    --naive     tell steam to launch the game\n"
+                "    --steam     launch game via Steam\n"
+            );
+            return 0;
+        }
+    }
+
+
+    if (launch_func == runOpenFortressDirect) { fprintf(stderr, "Launching directly\n"); }
+    else if (launch_func == runOpenFortressNaive) { fprintf(stderr, "Launching naively\n"); }
+    else if (launch_func == runOpenFortressSteam) { fprintf(stderr, "Launching via Steam\n"); }
+
     int local_rev = getLocalRevision(of_dir);
     if (0 > local_rev)
     {
@@ -215,7 +257,7 @@ static int run(int c, char** v)
         goto run_cleanup;
     }
 
-    runOpenFortress(v+1, (size_t)(c-1));
+    launch_func(v+1, (size_t)(c-1));
 
     run_cleanup:
     free(of_dir);
