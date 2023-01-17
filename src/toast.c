@@ -308,16 +308,23 @@ struct revision_t* getRevisionData(char* url, int rev)
     char* buf = malloc(len);
     snprintf(buf, len, "%s/%s/%i", url, TOAST_REVISIONS_ENDPOINT, rev);
 
-    struct json_object* revision_list = fetchJSON(buf);
+    struct json_object* revision_data = fetchJSON(buf);
     free(buf);
 
-    if (!revision_list)
+    if (!revision_data)
         return NULL;
 
     struct revision_t* revision = malloc(sizeof(struct revision_t));
     if (!revision)
     {
-        json_object_put(revision_list);
+        json_object_put(revision_data);
+        return NULL;
+    }
+
+    struct json_object* revision_list = json_object_object_get(revision_data, "changes");
+    if (!revision_list)
+    {
+        json_object_put(revision_data);
         return NULL;
     }
 
