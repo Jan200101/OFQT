@@ -4,15 +4,23 @@
 
 #include "steam.h"
 #include "toast.h"
+#include "proc.h"
 
 #include "commands.h"
 #include "updater.h"
+
+#ifdef HAS_HOOKS
+#include "hook.h"
+#endif
 
 #define ARRAY_LEN(arr) sizeof(arr) / sizeof(arr[0])
 
 static int install(int, char**);
 static int update(int, char**);
 static int run(int, char**);
+#ifdef HAS_HOOKS
+static int hook(int, char**);
+#endif
 static int version(int, char**);
 static int info(int, char**);
 
@@ -22,6 +30,9 @@ const struct Command commands[] = {
     { .name = "install",   .func = install, .description = "Install OpenFortress"},
     { .name = "update",    .func = update,  .description = "Update an existing install"},
     { .name = "run",       .func = run,     .description = "Run OpenFortress"},
+#ifdef HAS_HOOKS
+    { .name = "hook",      .func = hook,    .description = "Hook into OpenFortress to fix things"},
+#endif
     { .name = "version",   .func = version, .description = "Display the OFCL version"},
     { .name = "info",      .func = info,    .description = "Show info about the current setup"},
 };
@@ -210,17 +221,17 @@ static int run(int c, char** v)
 
         if (!strcmp(v[arg_index]+2, "direct"))
         {
-            
+
             launch_func = runOpenFortressDirect;
         }
         else if (!strcmp(v[arg_index]+2, "naive"))
         {
-            
+
             launch_func = runOpenFortressNaive;
         }
         else if (!strcmp(v[arg_index]+2, "steam"))
         {
-            
+
             launch_func = runOpenFortressSteam;
         }
         else
@@ -263,6 +274,22 @@ static int run(int c, char** v)
     free(of_dir);
     return exit_val;
 }
+
+#ifdef HAS_HOOKS
+static int hook(int c, char** v)
+{
+    if (getPid("hl2_linux") == -1)
+    {
+        //puts("OpenFortress is not running");
+        //return 1;
+    }
+
+    //puts("trying to fix Sys_LoadLibary");
+    fix_SysLoadLibary();
+
+    return 0;
+}
+#endif
 
 static int version(int c, char** v)
 {

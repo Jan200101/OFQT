@@ -1,16 +1,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "vdf.h"
+#include "proc.h"
 #include "steam.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#include <tlhelp32.h>
+#ifdef HAS_HOOKS
+#include "hook.h"
 #endif
 
 /**
@@ -181,122 +180,75 @@ char* getSourceSDK2013MpDir(void)
  * function to fetch the PID of a running Steam process.
  * If none were found returns -1
  */
-long getSteamPID(void)
+pid_t getSteamPID(void)
 {
-#if defined(__linux__) || defined(__FreeBSD__)
-
-#ifdef __FreeBSD__
-    // on FreeBSD /proc is not mounted by default
-    if (!isDir("/proc"))
-        return -1;
-#endif
-
-    long pid;
-    char buf[PATH_MAX];
-    struct dirent* ent;
-    DIR* proc = opendir("/proc");
-    FILE* stat;
-
-    if (proc)
-    {
-        while ((ent = readdir(proc)) != NULL)
-        {
-            long lpid = atol(ent->d_name);
-            if (!lpid) continue;
-
-            snprintf(buf, sizeof(buf), "/proc/%ld/stat", lpid);
-            stat = fopen(buf, "r");
-
-            if (stat && (fscanf(stat, "%li (%[^)])", &pid, buf)) == 2)
-            {                
-                if (!strcmp(buf, STEAM_PROC))
-                {
-                    fclose(stat);
-                    closedir(proc);
-                    return pid;
-                }
-                fclose(stat);
-            }
-        }
-
-        closedir(proc);
-    }
-
-#elif _WIN32
-    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    PROCESSENTRY32 pe32 = {0};
-    pe32.dwSize = sizeof(PROCESSENTRY32); 
-    Process32First(hSnap,&pe32);
-
-    while(Process32Next(hSnap,&pe32))
-    {
-        if (!strcmp(pe32.szExeFile, STEAM_PROC))
-            return (long)pe32.th32ProcessID;
-    }
-#else
-    #error No Implementation
-#endif
-    return -1;
+    return getPid(STEAM_PROC);
 }
 
 int runOpenFortressDirect(char** args, size_t arg_count)
 {
-    int in_fork = 0;
-#if defined(__linux__) || defined(__FreeBSD__)
-    // fork so we don't have to stay alive for the game
-    if (fork()) return 0;
-    in_fork = 1;
-#endif
-    char* game = getSourceSDK2013MpDir();
-    if (!game)
+    pid_t pid;
+
+    if ((pid = fork()))
     {
-        if (in_fork) exit(0);
-        else return 0;
+        // parent
+#ifdef HAS_HOOKS
+        //fix_SysLoadLibary(pid);
+#endif
+        return 0;
     }
-
-    char* of_dir = getOpenFortressDir();
-    if (!of_dir)
+    else
     {
-        free(game);
-        if (in_fork) exit(0);
-        else return 0;
-    }
+        // child
+        char* game = getSourceSDK2013MpDir();
+        if (!game)
+        {
+            exit(1);
+        }
 
-    game = realloc(game, strlen(game) + strlen(OS_PATH_SEP) + strlen(HL2_EXE) + 1);
-    strcat(game, OS_PATH_SEP);
-    strcat(game, HL2_EXE);
+        char* of_dir = getOpenFortressDir();
+        if (!of_dir)
+        {
+            free(game);
+            exit(1);
+        }
+
+        game = realloc(game, strlen(game) + strlen(OS_PATH_SEP) + strlen(HL2_EXE) + 1);
+        strcat(game, OS_PATH_SEP);
+        strcat(game, HL2_EXE);
 
 #if defined(__linux__) || defined(__FreeBSD__)
-    // we need to be in the steam environment to get the right locales 
-    setenv("SteamEnv", "1", 1);
+        // we need to be in the steam environment to get the right locales 
+        setenv("SteamEnv", "1", 1);
 #endif
 
-    char** argv = malloc(sizeof(char*) * (arg_count + 6));
+        char** argv = malloc(sizeof(char*) * (arg_count + 6));
 
 #ifdef _WIN32
-    size_t of_dir_len = strlen(of_dir); 
-    of_dir = realloc(of_dir, of_dir_len + 3);
-    memmove(of_dir+1, of_dir, of_dir_len);
-    of_dir[0] = '"';
-    of_dir[of_dir_len+1] = '"';
-    of_dir[of_dir_len+2] = '\0';
+        size_t of_dir_len = strlen(of_dir); 
+        of_dir = realloc(of_dir, of_dir_len + 3);
+        memmove(of_dir+1, of_dir, of_dir_len);
+        of_dir[0] = '"';
+        of_dir[of_dir_len+1] = '"';
+        of_dir[of_dir_len+2] = '\0';
 #endif
 
-    argv[0] = game;
-    argv[1] = "-game";
-    argv[2] = of_dir;
-    argv[3] = "-secure";
-    argv[4] = "-steam";
-    for (size_t i = 0; i < arg_count; ++i)
-        argv[5+i] = args[i];
-    argv[5+arg_count] = NULL;
+        argv[0] = game;
+        argv[1] = "-game";
+        argv[2] = of_dir;
+        argv[3] = "-secure";
+        argv[4] = "-steam";
+        for (size_t i = 0; i < arg_count; ++i)
+            argv[5+i] = args[i];
+        argv[5+arg_count] = NULL;
 
-    execv(game, argv);
+        execv(game, argv);
 
-    free(game);
-    free(of_dir);
+        free(game);
+        free(of_dir);
 
-    exit(0);
+        exit(0);
+    }
 }
 
 int runOpenFortressNaive(char** args, size_t arg_count)

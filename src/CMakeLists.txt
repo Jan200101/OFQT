@@ -23,11 +23,18 @@ list(APPEND
     ${CMAKE_CURRENT_SOURCE_DIR}/fs.h
     ${CMAKE_CURRENT_SOURCE_DIR}/net.c
     ${CMAKE_CURRENT_SOURCE_DIR}/net.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/proc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/proc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/steam.c
     ${CMAKE_CURRENT_SOURCE_DIR}/steam.h
     ${CMAKE_CURRENT_SOURCE_DIR}/toast.c
     ${CMAKE_CURRENT_SOURCE_DIR}/toast.h
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_compile_definitions(HAS_HOOKS)
+    add_subdirectory(hook)
+endif()
 
 add_library(tvn STATIC ${CORE_SOURCES})
 target_compile_options(tvn PUBLIC ${CFLAGS})
@@ -39,6 +46,7 @@ target_link_libraries(tvn LINK_PUBLIC ${LIBCURL_LIBRARIES})
 target_link_libraries(tvn LINK_PUBLIC ${JSONC_LIBRARIES})
 target_link_libraries(tvn LINK_PUBLIC md5)
 target_link_libraries(tvn LINK_PUBLIC vdf)
+target_link_libraries(tvn LINK_PUBLIC hook)
 
 if (WIN32)
     target_link_libraries(tvn LINK_PUBLIC shlwapi)

@@ -55,7 +55,7 @@ char* getSourcemodDir(void);
 char* getOpenFortressDir(void);
 char* getAppInstallDir(const char* appid);
 char* getSourceSDK2013MpDir(void);
-long getSteamPID(void);
+pid_t getSteamPID(void);
 
 int runOpenFortressDirect(char**, size_t);
 int runOpenFortressNaive(char**, size_t);
