@@ -61,8 +61,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->mainButton, SIGNAL(clicked()), this, SLOT(updateButton()));
     connect(ui->mainButton, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showButtonContext(const QPoint&)));
-    connect(ui->buttonDiscord, SIGNAL(clicked()), this, SLOT(openDiscordInvite()));
-    connect(ui->buttonWebsite, SIGNAL(clicked()), this, SLOT(openWebsite()));
 
     ui->mainButton->setText("...");
     ui->statusLabel->setText("...");
@@ -222,17 +220,6 @@ void MainWindow::showButtonContext(const QPoint& pos)
     {
         workerOperate(Worker::TASK_RUN);
     }
-}
-
-
-void MainWindow::openDiscordInvite()
-{
-  QDesktopServices::openUrl(QUrl("https://discord.gg/mKjW2ACCrm", QUrl::TolerantMode));
-}
-
-void MainWindow::openWebsite()
-{
-  QDesktopServices::openUrl(QUrl("https://openfortress.fun/", QUrl::TolerantMode));
 }
 
 void MainWindow::resetProgress()

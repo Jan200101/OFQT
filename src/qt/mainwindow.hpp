@@ -40,8 +40,6 @@ private slots:
     void settingsWindow();
     void updateButton();
     void showButtonContext(const QPoint&);
-    void openDiscordInvite();
-    void openWebsite();
 
 signals:
     void workerOperate(const Worker::Tasks_t&);
