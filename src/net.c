@@ -48,13 +48,7 @@ struct MemoryStruct* downloadToRam(const char* url)
 
     if (chunk)
     {
-        chunk->memory = malloc(1);
-        if (!chunk->memory)
-        {
-            free(chunk);
-            return NULL;
-        }
-        chunk->memory[0] = 0;
+        chunk->memory = NULL;
         chunk->size = 0;
 
         curl_handle = curl_easy_init();
