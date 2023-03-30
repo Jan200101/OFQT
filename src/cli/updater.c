@@ -93,6 +93,7 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
             snprintf(buf, len, "%s%s%s", of_dir, OS_PATH_SEP, file->path);
             if (isFile(buf) && remove(buf))
             {
+                // deletion failure is fine and can simple be ignored.
                 fprintf(stderr, "\rFailed to delete %s\n", file->path);
             }
             free(buf);
@@ -114,6 +115,9 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
             free(buf);
         }
 
+
+        char write_failure = 0;
+
         for (size_t i = 0; i < rev->file_count; ++i)
         {
             struct file_info* file = &rev->files[i];
@@ -122,15 +126,22 @@ void update_setup(char* of_dir, char* remote, int local_rev, int remote_rev)
             fprintf(stderr, "\rInstalling  %zu/%zu (%s)", i+1, rev->file_count, file->object);
             if (applyObject(of_dir, file))
             {
+                // failing to write an object usually means something is wrong with the path or object
                 fprintf(stderr, "\nFailed to write %s\n", file->path);
+                write_failure = 1;
             }
         }
 
-        removeObjects(of_dir);
         setLocalRemote(of_dir, remote);
-        setLocalRevision(of_dir, remote_rev);
+        if (!write_failure)
+        {
+            removeObjects(of_dir);
+            setLocalRevision(of_dir, remote_rev);
+            fprintf(stderr, "\nUpdated OpenFortress\n");
+        }
+        else
+            fprintf(stderr, "\nSomething went wrong during the upgrade\nThe Revisionw as installed as is, you can try updating again to fix it.\n");
 
-        fprintf(stderr, "\nUpdated OpenFortress\n");
         freeRevision(rev);
     }
 }
